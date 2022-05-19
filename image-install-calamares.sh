@@ -56,7 +56,7 @@ _install_OdroidN2_image() {
         mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
     fi
 
-    printf "\n\n${CYAN}Untarring the image...might take a few minutes.${NC}\n"
+    printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
     bsdtar -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
@@ -114,10 +114,10 @@ _install_RPi4_image() {
         mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
     fi
 
-    printf "\n\n${CYAN}Untarring the image...may take a few minutes.${NC}\n"
+    printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
     bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C MP2
 
-    printf "\n\n${CYAN}syncing files...may take a few minutes.${NC}\n"
+    printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
     sync
     mv MP2/boot/* MP1
     # make /etc/fstab work with a UUID instead of a label such as /dev/sda
@@ -208,7 +208,6 @@ _partition_format_mount() {
    rm mounts
    case $PLATFORM in
        OdroidN2)   _partition_OdroidN2 ;;
-       OdroidXU4)  _partition_OdroidXU4 ;;
        RPi64)      _partition_RPi4 ;;
    esac
    printf "\npartition name = $DEVICENAME\n\n" >> /root/enosARM.log
@@ -219,7 +218,7 @@ _partition_format_mount() {
    then
       DEVICENAME=$DEVICENAME"p"
    fi
-   
+   PARTNAME1=$DEVICENAME"1"
    mkfs.fat $PARTNAME1   2>> /root/enosARM.log
    PARTNAME2=$DEVICENAME"2"
    case $FILESYSTEMTYPE in
