@@ -19,14 +19,6 @@ _partition_RPi4() {
     quit
 }
 
-_partition_OdroidXU4() {
-    parted --script -a minimal $DEVICENAME \
-    mklabel msdos \
-    unit mib \
-    mkpart primary 2MiB $DEVICESIZE"MiB" \
-    quit
-}
-
 _choose_filesystem_type() {
     if [[ "$PLATFORM" == "RPi64" ]]; then
         FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
@@ -45,9 +37,27 @@ _choose_filesystem_type() {
 _install_OdroidN2_image() {
     local user_confirm
 
-    wget http://os.archlinuxarm.org/os/ArchLinuxARM-odroid-n2-latest.tar.gz
+    url=$(curl https://github.com/pudges-place/exper-images/releases | grep "image-odroid-n2.*/enosLinuxARM-odroid-n2-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
+    totalurl="https://github.com/"$url
+    wget $totalurl
+
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
+        btrfs subvolume create MP2/@
+        btrfs subvolume create MP2/@home
+        btrfs subvolume create MP2/@log
+        btrfs subvolume create MP2/@cache
+        umount MP2
+        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
+        mount -o $o_btrfs,subvol=@ $PARTNAME2 MP2
+        mkdir -p MP2/{boot,home,var/log,var/cache}
+        mount -o $o_btrfs,subvol=@home $PARTNAME2 MP2/home
+        mount -o $o_btrfs,subvol=@log $PARTNAME2 MP2/var/log
+        mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
+    fi
+
     printf "\n\n${CYAN}Untarring the image...might take a few minutes.${NC}\n"
-    bsdtar -xpf ArchLinuxARM-odroid-n2-latest.tar.gz -C MP2
+    bsdtar -xpf enosLinuxARM-odroid-n2-latest.tar.gz -C MP2
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
     # for Odroid N2 ask if storage device is micro SD or eMMC or USB device
@@ -66,7 +76,6 @@ _install_OdroidN2_image() {
            printf "\# Static information about the filesystems.\n# See fstab(5) for details.\n\n# <file system> <dir> <type> <options> <dump> <pass>\n" > MP2/etc/fstab
            printf "/dev/sda1  /boot   vfat    defaults        0       0\n/dev/sda2  /   ext4   defaults     0    0\n" >> MP2/etc/fstab ;;
     esac
-    cp $CONFIG_UPDATE MP2/root
 }   # End of function _install_OdroidN2_image
 
 _install_RPi4_image() {
@@ -77,7 +86,7 @@ _install_RPi4_image() {
     local totalurl
     local exit_status
 
-    url=$(curl https://github.com/pudges-place/exper-images/releases | grep "enos-image-.*/enosLinuxARM-rpi-aarch64-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
+    url=$(curl https://github.com/pudges-place/exper-images/releases | grep "image-rpi.*/enosLinuxARM-rpi-aarch64-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
     totalurl="https://github.com/"$url
     wget $totalurl
     # exit_status=$?
@@ -138,17 +147,6 @@ _install_RPi4_image() {
     # cp $CONFIG_UPDATE MP2/root
     # cp countrycodes MP2/root
 }  # End of function _install_RPi4_image
-
-_install_OdroidXU4_image() {
-    wget http://os.archlinuxarm.org/os/ArchLinuxARM-odroid-xu3-latest.tar.gz
-    printf "\n\n${CYAN}Untarring the image...might take a few minutes.${NC}\n"
-    bsdtar -xpf ArchLinuxARM-odroid-xu3-latest.tar.gz -C MP1
-    cd MP1/boot
-    sh sd_fusing.sh $DEVICENAME
-    cd ../..
-    cp $CONFIG_UPDATE MP1/root
-}   # End of function _install_OdroidXU4_image
-
 
 _partition_format_mount() {
    local finished
@@ -222,22 +220,16 @@ _partition_format_mount() {
       DEVICENAME=$DEVICENAME"p"
    fi
    
-   case $PLATFORM in
-      OdroidN2 | RPi64) PARTNAME1=$DEVICENAME"1"
-                        mkfs.fat $PARTNAME1   2>> /root/enosARM.log
-                        PARTNAME2=$DEVICENAME"2"
-                        case $FILESYSTEMTYPE in
-                            ext4) mkfs.ext4 -F $PARTNAME2   2>> /root/enosARM.log ;;
-                           btrfs) mkfs.btrfs -f $PARTNAME2   2>> /root/enosARM.log ;;
-                        esac
-                        mkdir MP1 MP2
-                        mount $PARTNAME1 MP1
-                        mount $PARTNAME2 MP2 ;;
-      OdroidXU4)        PARTNAME1=$DEVICENAME"1"
-                        mkfs.ext4 $PARTNAME1  2>> /root/enosARM.log
-                        mkdir MP1
-                        mount $PARTNAME1 MP1 ;;
+   mkfs.fat $PARTNAME1   2>> /root/enosARM.log
+   PARTNAME2=$DEVICENAME"2"
+   case $FILESYSTEMTYPE in
+       ext4) mkfs.ext4 -F $PARTNAME2   2>> /root/enosARM.log ;;
+       btrfs) mkfs.btrfs -f $PARTNAME2   2>> /root/enosARM.log ;;
    esac
+   mkdir MP1 MP2
+   mount $PARTNAME1 MP1
+   mount $PARTNAME2 MP2 ;;
+
 } # end of function _partition_format_mount
 
 _check_if_root() {
@@ -263,16 +255,14 @@ _check_all_apps_closed() {
 _choose_device() {
     PLATFORM=$(whiptail --title " SBC Model Selection" --menu --notags "\n            Choose which SBC to install or Press right arrow twice to cancel" 17 100 4 \
          "0" "Odroid N2 or N2+" \
-         "1" "Odroid XU4" \
-         "2" "Raspberry Pi 4b 64 bit" \
+         "1" "Raspberry Pi 4b 64 bit" \
     3>&2 2>&1 1>&3)
 
     case $PLATFORM in
         "") printf "\n\nScript aborted by user..${NC}\n\n"
             exit ;;
          0) PLATFORM="OdroidN2" ;;
-         1) PLATFORM="OdroidXU4" ;;
-         2) PLATFORM="RPi64" ;;
+         1) PLATFORM="RPi64" ;;
     esac
 }
 
@@ -305,21 +295,16 @@ Main() {
     _partition_format_mount  # function to partition, format, and mount a uSD card or eMMC card
     case $PLATFORM in
        OdroidN2)   _install_OdroidN2_image ;;
-       OdroidXU4)  _install_OdroidXU4_image ;;
        RPi64)      _install_RPi4_image ;;
     esac
 
     printf "\n\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n\n"
 
-    case $PLATFORM in
-       OdroidN2 | RPi64) if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-                            umount MP2/home MP2/var/log MP2/var/cache
-                         fi
-                         umount MP1 MP2
-                         rm -rf MP1 MP2 ;;
-       OdroidXU4)        umount MP1
-                         rm -rf MP1 ;;
-    esac
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+       umount MP2/home MP2/var/log MP2/var/cache
+    fi
+    umount MP1 MP2
+    rm -rf MP1 MP2 
 
 #    rm ArchLinuxARM*
 
