@@ -228,7 +228,7 @@ _partition_format_mount() {
    esac
    mkdir MP1 MP2
    mount $PARTNAME1 MP1
-   mount $PARTNAME2 MP2 ;;
+   mount $PARTNAME2 MP2
 
 } # end of function _partition_format_mount
 
