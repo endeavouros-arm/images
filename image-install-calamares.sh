@@ -57,7 +57,7 @@ _install_OdroidN2_image() {
     fi
 
     printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
-    bsdtar -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
+    bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
     # for Odroid N2 ask if storage device is micro SD or eMMC or USB device
