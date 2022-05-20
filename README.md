@@ -9,7 +9,7 @@ a Calamares installer.
 Installation.
 
 On an operational Arch Linux (or derivative) computer:
-Launch your favorite Terminal 
+Launch your favorite Terminal
 Make a temporary directory off of your home directory
 cd into that directory
 wget --preserve-permissions https://github.com/pudges-place/exper-images/raw/main/image-install-calamares.sh
