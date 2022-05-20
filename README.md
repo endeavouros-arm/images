@@ -9,12 +9,19 @@ a Calamares installer.
 Installation.
 
 On an operational Arch Linux (or derivative) computer:
+
 Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot.
+
 Launch your favorite Terminal
+
 Make a temporary directory off of your home directory
+
 cd into that directory
+
 wget --preserve-permissions https://github.com/pudges-place/exper-images/raw/main/image-install-calamares.sh
+
 check permissions, should show image-install-calamares.sh as executable.
+
 sudo ./image-install-calamares.sh
 
 After installation, 
