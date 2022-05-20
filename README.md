@@ -9,6 +9,7 @@ a Calamares installer.
 Installation.
 
 On an operational Arch Linux (or derivative) computer:
+Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot.
 Launch your favorite Terminal
 Make a temporary directory off of your home directory
 cd into that directory
