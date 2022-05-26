@@ -89,15 +89,15 @@ _install_RPi4_image() {
     url=$(curl https://github.com/pudges-place/exper-images/releases | grep "image-rpi.*/enosLinuxARM-rpi-aarch64-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
     totalurl="https://github.com/"$url
     wget $totalurl
-    # exit_status=$?
-    # if [ "$exit_status" != "0" ]; then
-    #     wget https://pudges-place.ddns.net/EndeavourOS/enosLinuxARM-rpi-aarch64-latest.tar.gz
-    #     exit_status=$?
-    #     if [ "$exit_status" != "0" ]; then
-    #         printf "\n\nCannot download the EnOS ARM 64 bit image. Check internet connections\n\n"
-    #         exit
-    #     fi
-    # fi
+    exit_status=$?
+    if [ "$exit_status" != "0" ]; then
+        wget https://pudges-place.ddns.net/EndeavourOS/enosLinuxARM-rpi-aarch64-latest.tar.gz
+        exit_status=$?
+        if [ "$exit_status" != "0" ]; then
+            printf "\n\nCannot download the EnOS ARM 64 bit image. Check internet connections\n\n"
+            exit
+        fi
+    fi
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -289,7 +289,8 @@ Main() {
     pacman -S --noconfirm --needed arch-install-scripts
     _check_if_root
     _check_all_apps_closed
-    _choose_device
+    # _choose_device
+    PLATFORM="RPi64"
     _choose_filesystem_type
     _partition_format_mount  # function to partition, format, and mount a uSD card or eMMC card
     case $PLATFORM in
@@ -303,9 +304,8 @@ Main() {
        umount MP2/home MP2/var/log MP2/var/cache
     fi
     umount MP1 MP2
-    rm -rf MP1 MP2 
-
-#    rm ArchLinuxARM*
+    rm -rf MP1 MP2
+    rm enosLinuxARM*
 
     printf "\n\n${CYAN}End of script!${NC}\n"
     printf "\n${CYAN}Be sure to use a file manager to umount the device before removing the USB SD reader${NC}\n"
