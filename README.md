@@ -13,17 +13,19 @@ On an operational Arch Linux (or derivative) computer:
 
 Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot.
 
-Launch your favorite Terminal
+Launch your favorite Terminal and maximize the window or make it at least 120 x 30
 
-Make a temporary directory off of your home directory
+In your home directory, make sure a folder named exper-images does not exist
 
-cd into that directory
+git clone https://github.com/pudges-place/exper-images.git
 
-wget --preserve-permissions https://github.com/pudges-place/exper-images/raw/main/image-install-calamares.sh
+cd into exper-images
 
 check permissions, should show image-install-calamares.sh as executable.
 
 sudo ./image-install-calamares.sh
+
+Follow the instructions.
 
 After installation,
 
