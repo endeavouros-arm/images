@@ -20,18 +20,16 @@ _partition_RPi4() {
 }
 
 _choose_filesystem_type() {
-    if [[ "$PLATFORM" == "RPi64" ]]; then
-        FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
-            "ext4" "ext4" \
-            "btrfs" "btrfs" \
-        3>&2 2>&1 1>&3)
+    FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
+       "ext4" "ext4" \
+       "btrfs" "btrfs" \
+      3>&2 2>&1 1>&3)
 
-        if [[ "$FILESYSTEMTYPE" == "" ]]; then   # if user chose to cancel
-            exit
-        fi
-    else
-        FILESYSTEMTYPE="ext4"
-    fi
+     case $FILESYSTEMTYPE in
+         "") exit ;;
+         ext4) FILESYSTEMTYPE="ext4" ;; 
+         btrfs) FILESYSTEMTYPE="btrfs" ;;
+     esac
 }
 
 _install_OdroidN2_image() {
@@ -58,24 +56,52 @@ _install_OdroidN2_image() {
 
     printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
     bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
+    printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
+    sync
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
     # for Odroid N2 ask if storage device is micro SD or eMMC or USB device
-    user_confirm=$(whiptail --title " Odroid N2 / N2+" --menu --notags "\n             Choose Storage Device or Press right arrow twice to abort" 17 100 3 \
-         "0" "micro SD card" \
-         "1" "eMMC card" \
-         "2" "USB device" \
-    3>&2 2>&1 1>&3)
+#    user_confirm=$(whiptail --title " Odroid N2 / N2+" --menu --notags "\n             Choose Storage Device or Press right aarow twice to abort" 17 100 3 \
+#         "0" "micro SD card" \
+#         "1" "eMMC card" \
+#         "2" "USB device" \
+#    3>&2 2>&1 1>&3)
 
-    case $user_confirm in
-       "") printf "\nScript aborted by user\n\n"
-           exit ;;
-        0) printf "\nN2 micro SD card\n" > /dev/null ;;
-        1) sed -i 's/mmcblk1/mmcblk0/g' MP2/etc/fstab ;;
-        2) sed -i 's/root=\/dev\/mmcblk${devno}p2/root=\/dev\/sda2/g' MP1/boot.ini
-           printf "\# Static information about the filesystems.\n# See fstab(5) for details.\n\n# <file system> <dir> <type> <options> <dump> <pass>\n" > MP2/etc/fstab
-           printf "/dev/sda1  /boot   vfat    defaults        0       0\n/dev/sda2  /   ext4   defaults     0    0\n" >> MP2/etc/fstab ;;
-    esac
+#    case $user_confirm in
+#       "") printf "\nScript aborted by user\n\n"
+#           exit ;;
+#        0) printf "\nN2 micro SD card\n" > /dev/null ;;
+#        1) sed -i 's/mmcblk1/mmcblk0/g' MP2/etc/fstab ;;
+#        2) sed -i 's/root=\/dev\/mmcblk${devno}p2/root=\/dev\/sda2/g' MP1/boot.ini
+#           printf "\# Static information about the filesystems.\n# See fstab(5) for details.\n\n# <file system> <dir> <type> <options> <dump> <pass>\n" > MP2/etc/fstab
+#           printf "/dev/sda1  /boot   vfat    defaults        0       0\n/dev/sda2  /   ext4   defaults     0    0\n" >> #MP2/etc/fstab ;;
+#    esac
+
+    # make /etc/fstab work with a UUID instead of a label such as /dev/sda
+    printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
+    mv MP2/etc/fstab MP2/etc/fstab-bkup
+    uuidno=$(lsblk -o UUID $PARTNAME1)
+    uuidno=$(echo $uuidno | sed 's/ /=/g')
+    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" >> MP2/etc/fstab
+    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> MP2/etc/fstab
+    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
+    printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        genfstab -U MP2 >> MP2/etc/fstab
+        sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
+    fi
+    # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
+    uuidno=$(lsblk -o UUID $PARTNAME2)
+    uuidno=$(echo $uuidno | sed 's/ /=/g')
+    old=$(grep "setenv bootargs \"root=" MP1/boot.ini)
+
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        boot_options="rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
+        new="setenv bootargs \"root=$uuidno $boot_options rootwait rw\""
+    else
+        new="setenv bootargs \"root=$uuidno rootwait rw\""
+    fi
+    sed -i "s#$old#$new#" MP1/boot.ini
 }   # End of function _install_OdroidN2_image
 
 _install_RPi4_image() {
@@ -144,8 +170,6 @@ _install_RPi4_image() {
         new="root="$uuidno
     fi
     sed -i "s#$old#$new#" MP1/cmdline.txt
-    # cp $CONFIG_UPDATE MP2/root
-    # cp countrycodes MP2/root
 }  # End of function _install_RPi4_image
 
 _partition_format_mount() {
@@ -289,8 +313,7 @@ Main() {
     pacman -S --noconfirm --needed arch-install-scripts
     _check_if_root
     _check_all_apps_closed
-    # _choose_device
-    PLATFORM="RPi64"
+    _choose_device
     _choose_filesystem_type
     _partition_format_mount  # function to partition, format, and mount a uSD card or eMMC card
     case $PLATFORM in
@@ -305,7 +328,7 @@ Main() {
     fi
     umount MP1 MP2
     rm -rf MP1 MP2
-    rm enosLinuxARM*
+#    rm enosLinuxARM*
 
     printf "\n\n${CYAN}End of script!${NC}\n"
     printf "\n${CYAN}Be sure to use a file manager to umount the device before removing the USB SD reader${NC}\n"
