@@ -23,11 +23,11 @@ In your root directory, make sure a folder named exper-images does not exist
 
 git clone https://github.com/pudges-place/exper-images.git
 
-cd into exper-images
+    cd into exper-images
 
 check permissions, should show image-install-calamares.sh as executable.
 
-sudo ./image-install-calamares.sh
+    # ./image-install-calamares.sh
 
 Follow the instructions.
 
