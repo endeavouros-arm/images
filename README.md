@@ -17,7 +17,7 @@ Launch your favorite Terminal and maximize the window or make it at least 120 x 
 
 $ su    (switch to root - enter root's password)
 
-# cd /root
+    # cd /root
 
 In your root directory, make sure a folder named exper-images does not exist
 
