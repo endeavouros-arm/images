@@ -15,7 +15,11 @@ Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD sl
 
 Launch your favorite Terminal and maximize the window or make it at least 120 x 30
 
-In your home directory, make sure a folder named exper-images does not exist
+$ su    (switch to root - enter root's password)
+
+# cd /root
+
+In your root directory, make sure a folder named exper-images does not exist
 
 git clone https://github.com/pudges-place/exper-images.git
 
