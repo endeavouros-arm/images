@@ -4,7 +4,7 @@
 _partition_OdroidN2() {
     parted --script -a minimal $DEVICENAME \
     mklabel msdos \
-    unit mib \
+    unit Mib \
     mkpart primary fat32 2MiB 258MiB \
     mkpart primary 258MiB $DEVICESIZE"MiB" \
     quit
@@ -33,6 +33,9 @@ _choose_filesystem_type() {
 }
 
 _install_OdroidN2_image() {
+    local uuidno
+    local old
+    local new
     local user_confirm
 
     url=$(curl https://github.com/pudges-place/exper-images/releases | grep "image-odroid-n2.*/enosLinuxARM-odroid-n2-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
@@ -328,7 +331,7 @@ Main() {
     fi
     umount MP1 MP2
     rm -rf MP1 MP2
-#    rm enosLinuxARM*
+    rm enosLinuxARM*
 
     printf "\n\n${CYAN}End of script!${NC}\n"
     printf "\n${CYAN}Be sure to use a file manager to umount the device before removing the USB SD reader${NC}\n"
