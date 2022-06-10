@@ -90,7 +90,7 @@ _install_OdroidN2_image() {
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
     printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -U MP2 >> MP2/etc/fstab
+        genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
     fi
     # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
@@ -160,7 +160,7 @@ _install_RPi4_image() {
     printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
     # make /boot/cmdline.txt work with a UUID instead of a lable such as /dev/sda
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -U MP2 >> MP2/etc/fstab
+        genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
     fi
     uuidno=$(lsblk -o UUID $PARTNAME2)
