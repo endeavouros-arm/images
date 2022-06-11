@@ -77,6 +77,7 @@ _install_OdroidN2_image() {
         genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i /zram/d MP2/etc/fstab   # Remove any swap carried over from the host device
     fi
     # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
@@ -148,6 +149,7 @@ _install_RPi4_image() {
         genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i /zram/d MP2/etc/fstab   # Remove any swap carried over from the host device
     fi
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
