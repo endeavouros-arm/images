@@ -63,22 +63,6 @@ _install_OdroidN2_image() {
     sync
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
-    # for Odroid N2 ask if storage device is micro SD or eMMC or USB device
-#    user_confirm=$(whiptail --title " Odroid N2 / N2+" --menu --notags "\n             Choose Storage Device or Press right aarow twice to abort" 17 100 3 \
-#         "0" "micro SD card" \
-#         "1" "eMMC card" \
-#         "2" "USB device" \
-#    3>&2 2>&1 1>&3)
-
-#    case $user_confirm in
-#       "") printf "\nScript aborted by user\n\n"
-#           exit ;;
-#        0) printf "\nN2 micro SD card\n" > /dev/null ;;
-#        1) sed -i 's/mmcblk1/mmcblk0/g' MP2/etc/fstab ;;
-#        2) sed -i 's/root=\/dev\/mmcblk${devno}p2/root=\/dev\/sda2/g' MP1/boot.ini
-#           printf "\# Static information about the filesystems.\n# See fstab(5) for details.\n\n# <file system> <dir> <type> <options> <dump> <pass>\n" > MP2/etc/fstab
-#           printf "/dev/sda1  /boot   vfat    defaults        0       0\n/dev/sda2  /   ext4   defaults     0    0\n" >> #MP2/etc/fstab ;;
-#    esac
 
     # make /etc/fstab work with a UUID instead of a label such as /dev/sda
     printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
@@ -92,6 +76,7 @@ _install_OdroidN2_image() {
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
+        sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
     fi
     # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
@@ -162,6 +147,7 @@ _install_RPi4_image() {
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -f /tmp -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
+        sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
     fi
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
