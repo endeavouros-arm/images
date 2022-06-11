@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 _partition_OdroidN2() {
@@ -74,10 +73,10 @@ _install_OdroidN2_image() {
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
     printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -f /tmp -U MP2 >> MP2/etc/fstab
+        genfstab -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i /zram/d MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
     # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
@@ -146,10 +145,10 @@ _install_RPi4_image() {
     printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
     # make /boot/cmdline.txt work with a UUID instead of a lable such as /dev/sda
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -f /tmp -U MP2 >> MP2/etc/fstab
+        genfstab -U MP2 >> MP2/etc/fstab
         sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i /zram/d MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
