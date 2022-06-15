@@ -37,7 +37,7 @@ _install_OdroidN2_image() {
     local new
     local user_confirm
 
-    url=$(curl https://github.com/EndeavourOS-arm/images/releases | grep "image-odroid-n2.*/enosLinuxARM-odroid-n2-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
+    url=$(curl https://github.com/endeavouros-arm/images/releases | grep "image-odroid-n2.*/enosLinuxARM-odroid-n2-latest.tar.zst" | sed s'#^.*pudges-place#pudges-place#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
     totalurl="https://github.com/"$url
     wget $totalurl
 
