@@ -27,10 +27,10 @@ Follow the instructions.
 After installation,
 ```
     # cd ..
-    # exit   (exit root)
+    # rm -rf images  (remove the images directory)
+    # exit           (exit root)
     $
 ```
-then remove the images directory.
 Connect the uSD or USB SSD enclosure to a Raspberry Pi 4b/400 device or Odroid N2/N2+ device.
 Then boot up the device.
 Openbox should automatically start up and present the Calamares installer.
