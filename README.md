@@ -8,28 +8,30 @@ These are provided by a Calamares installer.
 On an operational Arch Linux (or derivative) computer:
 Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot.
 Launch your favorite Terminal and maximize the window or make it at least 120 x 30
-```
-    $ su       # (switch to root - enter root's password)
-    # cd /tmp
+```bash 
+# (switch to root - enter root's password)
+su      
+cd /tmp
 ```
 In your tmp directory, make sure a folder named images does not exist
-```
-    # git clone https://github.com/endeavouros-arm/images.git
-    # cd into images
+```bash
+git clone https://github.com/endeavouros-arm/images.git
+cd into images
 ```
 check permissions, should show image-install-calamares.sh as executable.
-```
-    # ./image-install-calamares.sh
+```bash
+./image-install-calamares.sh
 ```
 Follow the instructions.
 
 # Post-Install
 After installation,
-```
-    # cd ..
-    # rm -rf images  (remove the images directory)
-    # exit           (exit root)
-    $
+```bash
+cd ..
+# (remove the images directory)
+rm -rf images  
+# (exit root)
+exit           
 ```
 Connect the uSD or USB SSD enclosure to a Raspberry Pi 4b/400 device or Odroid N2/N2+ device.
 Then boot up the device.
