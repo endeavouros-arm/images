@@ -325,7 +325,7 @@ Main() {
 
     printf "\n${CYAN}The default user is ${NC}alarm${CYAN} with the password ${NC}alarm\n"
     printf "${CYAN}The default root password is ${NC}root\n\n\n"
-    read -t 180 -n 1 -s -r -p "Press any key to continue"
+    read -n 1 -s -r -p "Press any key to continue"
     exit
 }
 
