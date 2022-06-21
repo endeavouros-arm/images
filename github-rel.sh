@@ -19,6 +19,7 @@ _help() {
 #################################################
 
 PLATFORM=""
+PLATI=""
 MODE=""
 
 PLAT="false"
@@ -32,8 +33,11 @@ fi
 case $1 in
    -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ]; then
            case $2 in
-              rpi) PLATFORM="rpi" ;;
-              odn) PLATFORM="odroid-n2" ;;
+              rpi) PLATFORM="rpi"
+                   PLATI="rpi-aarch64" ;;
+              odn) PLATFORM="odroid-n2"
+                   PLATI="odroid-n2" ;;
+
            esac
            PLAT="true"
          fi  ;;
@@ -76,11 +80,11 @@ printf "\nMODE = $MODE\n"
 DATE=$(date '+%Y%m%d')
 
 if [ "$MODE" == "create" ]; then
-    gh release create image-$PLATFORM-$DATE enosLinuxARM-$PLATFORM-latest.tar.zst* -t image-$PLATFORM-$DATE -F release-note-$PLATFORM.md
+    gh release create image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* -t image-$PLATFORM-$DATE -F release-note-$PLATFORM.md
     # echo $VAR
 fi
 
 if [ "$MODE" == "upload" ]; then
-    gh release upload image-$PLATFORM-$DATE enosLinuxARM-$PLATFORM-latest.tar.zst* --clobber
+    gh release upload image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* --clobber
     # echo $VAR
 fi
