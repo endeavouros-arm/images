@@ -57,7 +57,8 @@ _install_OdroidN2_image() {
     fi
 
     printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
-    bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
+    pv "enosLinuxARM-odroid-n2-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
     printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
     sync
     mv MP2/boot/* MP1
@@ -129,8 +130,8 @@ _install_RPi4_image() {
     fi
 
     printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
-    bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C MP2
-
+    pv "enosLinuxARM-rpi-aarch64-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C MP2
     printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
     sync
     mv MP2/boot/* MP1
