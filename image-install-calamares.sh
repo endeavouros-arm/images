@@ -104,15 +104,6 @@ _install_RPi4_image() {
     url=$(curl https://github.com/endeavouros-arm/images/releases | grep "image-rpi.*/enosLinuxARM-rpi-aarch64-latest.tar.zst" | sed s'#^.*endeavouros-arm#endeavouros-arm#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
     totalurl="https://github.com/"$url
     wget $totalurl
-    exit_status=$?
-    if [ "$exit_status" != "0" ]; then
-        wget https://pudges-place.ddns.net/EndeavourOS/enosLinuxARM-rpi-aarch64-latest.tar.gz
-        exit_status=$?
-        if [ "$exit_status" != "0" ]; then
-            printf "\n\nCannot download the EnOS ARM 64 bit image. Check internet connections\n\n"
-            exit
-        fi
-    fi
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
