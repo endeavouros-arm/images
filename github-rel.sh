@@ -80,7 +80,8 @@ printf "\nMODE = $MODE\n"
 DATE=$(date '+%Y%m%d')
 
 if [ "$MODE" == "create" ]; then
-    gh release create image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* -t image-$PLATFORM-$DATE -F release-note-$PLATFORM.md
+    gh release create image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* -t image-$PLATFORM-$DATE -F release-note-$PLATFORM.md -d
+    gh release edit image-$PLATFORM-$DATE --draft=false
     # echo $VAR
 fi
 
