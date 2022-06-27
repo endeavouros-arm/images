@@ -152,6 +152,7 @@ _install_RPi4_image() {
         new="root="$uuidno
     fi
     sed -i "s#$old#$new#" MP1/cmdline.txt
+    printf "usbhid.mousepoll=8\n" >> MP1/cmdline.txt  # improve mouse speed & smoothness
 }  # End of function _install_RPi4_image
 
 _partition_format_mount() {
