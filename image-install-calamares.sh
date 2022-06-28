@@ -145,14 +145,13 @@ _install_RPi4_image() {
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' MP1/cmdline.txt)
-    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        boot_options="rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
-        new="root="$uuidno" "$boot_options
-    else
-        new="root="$uuidno
-    fi
+    case $FILESYSTEMTYPE in
+        brtfs) boot_options=" rootflags=subvol=@ rootfstype=btrfs fsck.repair=no usbhid.mousepoll=8" ;;
+         ext4) boot_options=" usbhid.mousepoll=8" ;;
+    esac
+    new="root=$uuidno"
     sed -i "s#$old#$new#" MP1/cmdline.txt
-    printf "usbhid.mousepoll=8\n" >> MP1/cmdline.txt  # improve mouse speed & smoothness
+    sed -i "s/$/$boot_options/" MP1/cmdline.txt
 }  # End of function _install_RPi4_image
 
 _partition_format_mount() {
