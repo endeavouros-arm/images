@@ -16,7 +16,7 @@ cd /tmp
 In your tmp directory, make sure a folder named images does not exist
 ```bash
 git clone https://github.com/endeavouros-arm/images.git
-cd into images
+cd images
 ```
 check permissions, should show image-install-calamares.sh as executable.
 ```bash
