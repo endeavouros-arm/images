@@ -146,10 +146,11 @@ _install_RPi4_image() {
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' MP1/cmdline.txt)
     case $FILESYSTEMTYPE in
-        btrfs) boot_options=" rootflags=subvol=@ rootfstype=btrfs fsck.repair=no usbhid.mousepoll=8" ;;
-         ext4) boot_options=" usbhid.mousepoll=8" ;;
+        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
+               boot_options=" usbhid.mousepoll=8" ;;
+         ext4) new="root=$uuidno"
+               boot_options=" usbhid.mousepoll=8" ;;
     esac
-    new="root=$uuidno"
     sed -i "s#$old#$new#" MP1/cmdline.txt
     sed -i "s/$/$boot_options/" MP1/cmdline.txt
 }  # End of function _install_RPi4_image
