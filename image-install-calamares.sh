@@ -146,7 +146,7 @@ _install_RPi4_image() {
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' MP1/cmdline.txt)
     case $FILESYSTEMTYPE in
-        brtfs) boot_options=" rootflags=subvol=@ rootfstype=btrfs fsck.repair=no usbhid.mousepoll=8" ;;
+        btrfs) boot_options=" rootflags=subvol=@ rootfstype=btrfs fsck.repair=no usbhid.mousepoll=8" ;;
          ext4) boot_options=" usbhid.mousepoll=8" ;;
     esac
     new="root=$uuidno"
