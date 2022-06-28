@@ -291,8 +291,7 @@ Main() {
     CYAN='\033[0;36m'
     NC='\033[0m' # No Color
 
-    pacman -S --noconfirm --needed libnewt &>/dev/null # for whiplash dialog
-    pacman -S --noconfirm --needed arch-install-scripts pv
+    pacman -S --noconfirm --needed libnewt arch-install-scripts pv &>/dev/null # packages needed for install
     _check_if_root
     _check_all_apps_closed
     _choose_device
