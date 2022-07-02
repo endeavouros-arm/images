@@ -22,9 +22,9 @@ Remove the uSD card or USB SSD and connect it to your RPi 4 or Odroid N2.
 
 # Method two
 
-The live ISO is not necessary in this procedure.
-On an operational Arch Linux (or derivative) computer:
-Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot.
+The live ISO is not necessary in this procedure. <br />
+On an operational Arch Linux (or derivative) computer: <br />
+Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot. <br />
 Launch your favorite Terminal and maximize the window or make it at least 120 x 30
 ```bash 
 # (switch to root - enter root's password)
@@ -42,7 +42,7 @@ check permissions, should show image-install-calamares.sh as executable.
 ```
 Follow the instructions.
 
-# Post-Install
+Post-Install Method 2
 After installation,
 ```bash
 cd ..
