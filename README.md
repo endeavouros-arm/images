@@ -14,8 +14,8 @@ The first method is to boot from the EndeavourOS x86_64 Live ISO available here:
 
 https://endeavouros.com/latest-release/
 
-Connect a target storage device to the computer, either micro SD or USB SSD.
-Boot into the EndeavourOS live ISO.
+Connect a target storage device to the computer, either micro SD or USB SSD. <br />
+Boot into the EndeavourOS live ISO. <>br /
 Then click the welcome button labeled "EndeavourOS ARM Image Installer". <br />
 Answering a few questions, will start a script that installs the image for you. <br />
 Remove the uSD card or USB SSD and connect it to your RPi 4 or Odroid N2.
