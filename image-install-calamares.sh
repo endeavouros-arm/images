@@ -75,7 +75,7 @@ _install_OdroidN2_image() {
     printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -U MP2 >> MP2/etc/fstab
-        sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
+        sed -i 's/subvolid=.*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
         sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
