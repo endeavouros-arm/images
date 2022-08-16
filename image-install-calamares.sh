@@ -138,7 +138,7 @@ _install_RPi4_image() {
     # make /boot/cmdline.txt work with a UUID instead of a lable such as /dev/sda
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -U MP2 >> MP2/etc/fstab
-        sed -i 's/subvolid=\d*,//g' MP2/etc/fstab
+        sed -i 's/subvolid=.*,//g' MP2/etc/fstab
         sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
         sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
