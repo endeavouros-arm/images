@@ -1,5 +1,15 @@
 #!/bin/bash
 
+_partition_Pinebook() {
+    dd if=/dev/zero of=$DEVICENAME bs=1M count=16
+    parted --script -a minimal $DEVICENAME \
+    mklabel gpt \
+    unit mib \
+    mkpart primary fat32 16MiB 216MiB \
+    mkpart primary 216MiB $DEVICESIZE"MiB" \
+    quit
+}
+
 _partition_OdroidN2() {
     parted --script -a minimal $DEVICENAME \
     mklabel msdos \
@@ -30,6 +40,65 @@ _choose_filesystem_type() {
          btrfs) FILESYSTEMTYPE="btrfs" ;;
      esac
 }
+
+_install_Pinebook_image() {
+    local uuidno
+    local old
+    local new
+    local user_confirm
+
+    url=$(curl https://github.com/endeavouros-arm/images/releases | grep "image-pbp.*/enosLinuxARM-pbp-latest.tar.zst" | sed s'#^.*endeavouros-arm#endeavouros-arm#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
+    totalurl="https://github.com/"$url
+    wget $totalurl
+
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
+        btrfs subvolume create MP2/@
+        btrfs subvolume create MP2/@home
+        btrfs subvolume create MP2/@log
+        btrfs subvolume create MP2/@cache
+        umount MP2
+        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
+        mount -o $o_btrfs,subvol=@ $PARTNAME2 MP2
+        mkdir -p MP2/{boot,home,var/log,var/cache}
+        mount -o $o_btrfs,subvol=@home $PARTNAME2 MP2/home
+        mount -o $o_btrfs,subvol=@log $PARTNAME2 MP2/var/log
+        mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
+    fi
+
+    printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
+    pv "enosLinuxARM-pbp-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-pbp-latest.tar.zst -C MP2
+    printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
+    sync
+    mv MP2/boot/* MP1
+    dd if=MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
+
+    # make /etc/fstab work with a UUID instead of a label such as /dev/sda
+    printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
+    mv MP2/etc/fstab MP2/etc/fstab-bkup
+    uuidno=$(lsblk -o UUID $PARTNAME1)
+    uuidno=$(echo $uuidno | sed 's/ /=/g')
+    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" >> MP2/etc/fstab
+    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> MP2/etc/fstab
+    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
+    printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        genfstab -U MP2 >> MP2/etc/fstab
+        sed -i 's/subvolid=.*,//g' MP2/etc/fstab
+        sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
+    fi
+    # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
+    uuidno=$(lsblk -o UUID $PARTNAME2)
+    uuidno=$(echo $uuidno | sed 's/ /=/g')
+    old=$(grep -o 'root=.* ' MP1/extlinux/extlinux.conf)
+    case $FILESYSTEMTYPE in
+        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no rw rootwait" ;;
+         ext4) new="root=$uuidno rw rootwait" ;;
+    esac
+    sed -i "s#$old#$new #" MP1/extlinux/extlinux.conf
+}   # End of function _install_Pinebook_image
 
 _install_OdroidN2_image() {
     local uuidno
@@ -262,6 +331,7 @@ _choose_device() {
     PLATFORM=$(whiptail --title " SBC Model Selection" --menu --notags "\n            Choose which SBC to install or Press right arrow twice to cancel" 17 100 4 \
          "0" "Raspberry Pi 4b 64 bit" \
          "1" "Odroid N2 or N2+" \
+         "2" "Pinebook Pro" \
     3>&2 2>&1 1>&3)
 
     case $PLATFORM in
@@ -269,6 +339,7 @@ _choose_device() {
             exit ;;
          0) PLATFORM="RPi64" ;;
          1) PLATFORM="OdroidN2" ;;
+         2) PLATFORM="Pinebook" ;;
     esac
 }
 
@@ -301,6 +372,7 @@ Main() {
     case $PLATFORM in
        OdroidN2)   _install_OdroidN2_image ;;
        RPi64)      _install_RPi4_image ;;
+       Pinebook) _install_Pinebook_image ;;
     esac
 
     printf "\n\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n\n"
