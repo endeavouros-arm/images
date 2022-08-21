@@ -8,7 +8,7 @@ _help() {
    printf "options:\n"
    printf "Either two options -p -m are required\n"
    printf "Or the single option -h\n\n"
-   printf " -p  enter platform, requires rpi or odn\n"
+   printf " -p  enter platform, requires rpi or odn or pbp\n"
    printf " -m  enter create release or upload release, requires cre or upl\n"
    printf " -h  Print this Help.\n\n"
    printf "example:  github-rel -p rpi -m cre\n\n"
@@ -31,13 +31,14 @@ if [ "$#" == "0" ] || [ "$1" == "-h" ]; then
 fi
 
 case $1 in
-   -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ]; then
+   -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ] || [ "$2" == "pbp" ]; then
            case $2 in
               rpi) PLATFORM="rpi"
                    PLATI="rpi-aarch64" ;;
               odn) PLATFORM="odroid-n2"
                    PLATI="odroid-n2" ;;
-
+              pbp) PLATFORM="pbp"
+                   PLATI="pbp" ;;
            esac
            PLAT="true"
          fi  ;;
@@ -51,10 +52,14 @@ case $1 in
 esac
 
 case $3 in
-   -p)  if [ "$4" == "rpi" ] || [ "$4" == "odn" ]; then
-           case $4 in
-              rpi) PLATFORM="rpi" ;;
-              odn) PLATFORM="odroid-n2" ;;
+   -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ] || [ "$2" == "pbp" ]; then
+           case $2 in
+              rpi) PLATFORM="rpi"
+                   PLATI="rpi-aarch64" ;;
+              odn) PLATFORM="odroid-n2"
+                   PLATI="odroid-n2" ;;
+              pbp) PLATFORM="pbp"
+                   PLATI="pbp" ;;
            esac
            PLAT="true"
          fi ;;

@@ -283,6 +283,7 @@ _partition_format_mount() {
    fi
    rm mounts
    case $PLATFORM in
+       Pinebook)   _partition_Pinebook ;;
        OdroidN2)   _partition_OdroidN2 ;;
        RPi64)      _partition_RPi4 ;;
    esac
