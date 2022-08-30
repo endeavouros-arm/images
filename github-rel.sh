@@ -25,72 +25,62 @@ MODE=""
 PLAT="false"
 MOD="false"
 
-if [ "$#" == "0" ] || [ "$1" == "-h" ]; then
-    _help
-    exit
-fi
+# Available options
+opt=":p:m:b:h"
 
-case $1 in
-   -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ] || [ "$2" == "pbp" ]; then
-           case $2 in
-              rpi) PLATFORM="rpi"
-                   PLATI="rpi-aarch64" ;;
-              odn) PLATFORM="odroid-n2"
-                   PLATI="odroid-n2" ;;
-              pbp) PLATFORM="pbp"
-                   PLATI="pbp" ;;
-           esac
-           PLAT="true"
-         fi  ;;
-   -m)  if [ "$2" == "cre" ] || [ "$2" == "upl" ]; then
-           case $2 in
-              cre) MODE="create" ;;
-              upl) MODE="upload" ;;
-           esac
-           MOD="true"
-        fi ;;
+while getopts "${opt}" arg; do
+  case $arg in
+    p)
+      PLAT="${OPTARG}"
+      ;;
+    m)
+      MODE="${OPTARG}"
+      ;;
+    \?)
+      echo "Option -${OPTARG} is not valid, aborting"
+      exit 1
+      ;;
+    h|?)
+      _help
+      exit 1
+      ;;
+    :)
+      echo "Option -${OPTARG} requires an argument, aborting"
+      exit 1
+      ;;
+  esac
+done
+
+case $PLAT in
+    rpi) PLAT1="rpi"
+         PLAT2="rpi-aarch64" ;;
+    odn) PLAT1="odroid-n2"
+         PLAT2="odroid-n2" ;;
+    pbp) PLAT1="pbp"
+         PLAT2="pbp" ;;
 esac
 
-case $3 in
-   -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ] || [ "$2" == "pbp" ]; then
-           case $2 in
-              rpi) PLATFORM="rpi"
-                   PLATI="rpi-aarch64" ;;
-              odn) PLATFORM="odroid-n2"
-                   PLATI="odroid-n2" ;;
-              pbp) PLATFORM="pbp"
-                   PLATI="pbp" ;;
-           esac
-           PLAT="true"
-         fi ;;
-   -m)  if [ "$4" == "cre" ] || [ "$4" == "upl" ]; then
-           case $4 in
-              cre) MODE="create" ;;
-              upl) MODE="upload" ;;
-           esac
-           MOD="true"
-        fi ;;
+case $MODE in
+    cre) MODE1="create" ;;
+    upl) MODE1="upload" ;;
 esac
 
+# if [ "$PLAT" == "false" ] || [ "$MOD" == "false" ] ; then
+#     printf "\nOne or more options were invalid\n"
+#     _help
+#     exit
+# fi
 
-if [ "$PLAT" == "false" ] || [ "$MOD" == "false" ] ; then
-    printf "\nOne or more options were invalid\n"
-    _help
-    exit
-fi
-
-printf "\nPLATFORM = $PLATFORM"
-printf "\nMODE = $MODE\n"
+printf "\nPLATFORM = $PLAT1"
+printf "\nMODE = $MODE1\n"
 
 DATE=$(date '+%Y%m%d')
 
-if [ "$MODE" == "create" ]; then
-    gh release create image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* -t image-$PLATFORM-$DATE -F release-note-$PLATFORM.md -d
-    gh release edit image-$PLATFORM-$DATE --draft=false
-    # echo $VAR
+if [ "$MODE1" == "create" ]; then
+    gh release create image-$PLAT1-$DATE enosLinuxARM-$PLAT2-latest.tar.zst* -t image-$PLAT1-$DATE -F release-note-$PLAT1.md -d
+    gh release edit image-$PLAT1-$DATE --draft=false
 fi
 
 if [ "$MODE" == "upload" ]; then
-    gh release upload image-$PLATFORM-$DATE enosLinuxARM-$PLATI-latest.tar.zst* --clobber
-    # echo $VAR
+    gh release upload image-$PLAT1-$DATE enosLinuxARM-$PLAT2-latest.tar.zst* --clobber
 fi
