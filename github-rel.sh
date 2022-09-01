@@ -22,8 +22,8 @@ PLATFORM=""
 PLATI=""
 MODE=""
 
-PLAT="false"
-MOD="false"
+PLAT3=false
+MODE3=false
 
 # Available options
 opt=":p:m:b:h"
@@ -53,23 +53,25 @@ done
 
 case $PLAT in
     rpi) PLAT1="rpi"
-         PLAT2="rpi-aarch64" ;;
+         PLAT2="rpi-aarch64";;
     odn) PLAT1="odroid-n2"
-         PLAT2="odroid-n2" ;;
+         PLAT2="odroid-n2";;
     pbp) PLAT1="pbp"
-         PLAT2="pbp" ;;
+         PLAT2="pbp";;
+    *)   PLAT3=true;;
 esac
 
 case $MODE in
-    cre) MODE1="create" ;;
-    upl) MODE1="upload" ;;
+    cre) MODE1="create";;
+    upl) MODE1="upload";;
+    *)   MODE3=true;;
 esac
 
-# if [ "$PLAT" == "false" ] || [ "$MOD" == "false" ] ; then
-#     printf "\nOne or more options were invalid\n"
-#     _help
-#     exit
-# fi
+if $PLAT3 || $MODE3 ; then
+    printf "\nOne or more options were invalid\n"
+    _help
+    exit
+fi
 
 printf "\nPLATFORM = $PLAT1"
 printf "\nMODE = $MODE1\n"
