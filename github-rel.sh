@@ -28,6 +28,13 @@ MODE3=false
 # Available options
 opt=":p:m:b:h"
 
+if [[ ! $@ =~ ^\-.+ ]]
+then
+    echo "The script requires an argument, aborting"
+    _help
+    exit 1
+fi
+
 while getopts "${opt}" arg; do
   case $arg in
     p)
