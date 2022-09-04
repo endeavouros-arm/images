@@ -90,6 +90,6 @@ if [ "$MODE1" == "create" ]; then
     gh release edit image-$PLAT1-$DATE --draft=false
 fi
 
-if [ "$MODE" == "upload" ]; then
+if [ "$MODE1" == "upload" ]; then
     gh release upload image-$PLAT1-$DATE enosLinuxARM-$PLAT2-latest.tar.zst* --clobber
 fi
