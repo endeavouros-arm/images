@@ -2,29 +2,39 @@
 
 import subprocess
 
-command = ["gh", "release", "list"]
-out = subprocess.check_output(command)
 
-text = out
-text = text.decode('utf-8')
-print(text)
-text = text.split('\n')
-
-devices = ['rpi', 'odroid', 'pbp']
-
-releases = {}
-
-for dev in devices:
-    idx = 0
-    releases[dev] = {}
+def releases_parse(text: list[str]) -> list[str]:
+    'function to parse the output of github release list'
+    rel = []
     for line in text:
-        if dev in line:
-            word = line.split('\t')
-            releases[dev][idx] = word[0]
-            idx += 1
+        word = line.split("\t")[0]
+        print(word)
+        rel.append(word)
+    return rel
 
-for dev in devices:
-    for cnt in range(len(releases[dev])):
-        if cnt > 1:
-            cmd = ["gh", "release", "delete", releases[dev][cnt]]
-            subprocess.call(cmd)
+
+def device_releases(dev: str, rel: list[str]) -> list [str]:
+    'function to filter parsed output by device'
+    dev_rel = []
+    for release in rel:
+        if release.startswith(f"image-{dev}-"):
+            dev_rel.append(release)
+    return dev_rel
+
+
+def main():
+    command = ["gh", "release", "list"]
+    out = subprocess.check_output(command).decode("utf-8")
+    print(out)
+    text = out.split("\n")
+    releases = releases_parse(text)
+    devices = ["rpi", "odroid", "pbp"]
+    for dev in devices:
+        for i, release in enumerate(device_releases(dev, releases)):
+            if i > 1:
+                cmd = ["gh", "release", "delete", release]
+                subprocess.call(cmd)
+
+
+if __name__ == "__main__":
+    main()
