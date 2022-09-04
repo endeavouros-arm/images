@@ -2,29 +2,29 @@
 
 import subprocess
 
-command = ["gh","release","list"]
+command = ["gh", "release", "list"]
 out = subprocess.check_output(command)
 
-t= out
-t=t.decode('utf-8')
-print(t)
-t=t.split('\n')
+text = out
+text = text.decode('utf-8')
+print(text)
+text = text.split('\n')
 
-devices = ['rpi','odroid','pbp']
+devices = ['rpi', 'odroid', 'pbp']
 
-dct = dict(zip(devices, [None]*len(devices)))
-
-for dev in devices:
-    ii=0
-    dct[dev]={}
-    for tt in t:
-        if dev in tt:
-            ttt = tt.split('\t')
-            dct[dev][ii]=ttt[0]
-            ii+=1
+releases = {}
 
 for dev in devices:
-    for ii in range(len(dct[dev])):
-        if ii > 1:
-            cmd = ["gh","release","delete",dct[dev][ii]]
+    idx = 0
+    releases[dev] = {}
+    for line in text:
+        if dev in line:
+            word = line.split('\t')
+            releases[dev][idx] = word[0]
+            idx += 1
+
+for dev in devices:
+    for cnt in range(len(releases[dev])):
+        if cnt > 1:
+            cmd = ["gh", "release", "delete", releases[dev][cnt]]
             subprocess.call(cmd)
