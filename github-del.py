@@ -4,7 +4,7 @@ import subprocess
 
 
 def releases_parse(text: list[str]) -> list[str]:
-    'function to parse the output of github release list'
+    "function to parse the output of github release list"
     rel = []
     for line in text:
         word = line.split("\t")[0]
@@ -13,8 +13,8 @@ def releases_parse(text: list[str]) -> list[str]:
     return rel
 
 
-def device_releases(dev: str, rel: list[str]) -> list [str]:
-    'function to filter parsed output by device'
+def device_releases(dev: str, rel: list[str]) -> list[str]:
+    "function to filter parsed output by device"
     dev_rel = []
     for release in rel:
         if release.startswith(f"image-{dev}-"):
