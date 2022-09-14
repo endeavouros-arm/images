@@ -37,9 +37,8 @@ _install_OdroidN2_image() {
     local new
     local user_confirm
 
-    url=$(curl https://github.com/endeavouros-arm/images/releases | grep "image-odroid-n2.*/enosLinuxARM-odroid-n2-latest.tar.zst" | sed s'#^.*endeavouros-arm#endeavouros-arm#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
-    totalurl="https://github.com/"$url
-    wget $totalurl
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep image-odroid-n2 |  sed s'#^.*image-odroid-n2#image-odroid-n2#'g | cut -c 1-24 | head -n 1)
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -101,9 +100,8 @@ _install_RPi4_image() {
     local totalurl
     local exit_status
 
-    url=$(curl https://github.com/endeavouros-arm/images/releases | grep "image-rpi.*/enosLinuxARM-rpi-aarch64-latest.tar.zst" | sed s'#^.*endeavouros-arm#endeavouros-arm#'g | sed s'#latest.tar.zst.*#latest.tar.zst#'g | head -n 1)
-    totalurl="https://github.com/"$url
-    wget $totalurl
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep image-rpi |  sed s'#^.*image-rpi#image-rpi#'g | cut -c 1-18 | head -n 1)
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-aarch64-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
