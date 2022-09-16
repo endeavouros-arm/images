@@ -35,13 +35,13 @@ then
     exit 1
 fi
 
-while getopts "${opt}" arg; do
+while getopts "$opt" arg; do
   case $arg in
     p)
-      PLAT="${OPTARG}"
+      PLAT="$OPTARG"
       ;;
     m)
-      MODE="${OPTARG}"
+      MODE="$OPTARG"
       ;;
     \?)
       echo "Option -${OPTARG} is not valid, aborting"
@@ -74,7 +74,7 @@ case $MODE in
     *)   MODE3=true;;
 esac
 
-if $PLAT3 || $MODE3 ; then
+if "$PLAT3" || "$MODE3" ; then
     printf "\nOne or more options were invalid\n"
     _help
     exit
@@ -86,10 +86,10 @@ printf "\nMODE = $MODE1\n"
 DATE=$(date '+%Y%m%d')
 
 if [ "$MODE1" == "create" ]; then
-    gh release create image-$PLAT1-$DATE enosLinuxARM-$PLAT2-latest.tar.zst* -t image-$PLAT1-$DATE -F release-note-$PLAT1.md -d
-    gh release edit image-$PLAT1-$DATE --draft=false
+    gh release create image-"$PLAT1-$DATE" enosLinuxARM-"$PLAT2"-latest.tar.zst* -t image-"$PLAT1-$DATE" -F release-note-"$PLAT1".md -d
+    gh release edit image-"$PLAT1-$DATE" --draft=false
 fi
 
 if [ "$MODE1" == "upload" ]; then
-    gh release upload image-$PLAT1-$DATE enosLinuxARM-$PLAT2-latest.tar.zst* --clobber
+    gh release upload image-"$PLAT1-$DATE" enosLinuxARM-"$PLAT2"-latest.tar.zst* --clobber
 fi
