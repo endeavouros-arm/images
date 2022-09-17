@@ -34,7 +34,7 @@ case $1 in
    -p)  if [ "$2" == "rpi" ] || [ "$2" == "odn" ]; then
            case $2 in
               rpi) PLATFORM="rpi"
-                   PLATI="rpi-aarch64" ;;
+                   PLATI="rpi" ;;
               odn) PLATFORM="odroid-n2"
                    PLATI="odroid-n2" ;;
 

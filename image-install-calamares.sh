@@ -101,7 +101,7 @@ _install_RPi4_image() {
     local exit_status
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep image-rpi |  sed s'#^.*image-rpi#image-rpi#'g | cut -c 1-18 | head -n 1)
-    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-aarch64-latest.tar.zst
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
