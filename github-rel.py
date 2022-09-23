@@ -104,7 +104,7 @@ def main():
     out = subprocess.check_output(command).decode("utf-8")
     text = out.split("\n")
     releases = releases_parse(text)
-    out = device_releases(platform, releases)
+    out = device_releases(plat, releases)
     if DATE in out[0]:
         print("An image was already released today")
         print("Modifying the existing release. Can take 10-20 minutes")
