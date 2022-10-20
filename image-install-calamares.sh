@@ -100,7 +100,7 @@ _install_RPi4_image() {
     local totalurl
     local exit_status
 
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep image-rpi |  sed s'#^.*image-rpi#image-rpi#'g | cut -c 1-18 | head -n 1)
+    tag=$(curl https://api.github.com/repos/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
