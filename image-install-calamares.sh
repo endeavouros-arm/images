@@ -37,7 +37,7 @@ _install_OdroidN2_image() {
     local new
     local user_confirm
 
-    tag=$(curl https://api.github.com/repos/endeavouros-arm/images/releases | grep image-odroid-n2 |  sed s'#^.*image-odroid-n2#image-odroid-n2#'g | cut -c 1-24 | head -n 1)
+    tag=$(curl https://api.github.com/repos/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
     printf "\n\n${CYAN}Downloading Odroid N2 image with TAG = $tag${NC}\n\n"
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
 
