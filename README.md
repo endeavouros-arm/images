@@ -63,8 +63,8 @@ look for the latest ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image
 where 2023 is the year, 01 is the month, 15 is the day.
 
 When you find the desired image, click on it.
-Under Assets, click on
-enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum
+Under Assets, click on <br /> 
+enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
 If you want Odroid N2 image, subsitute odroid-n2 for rpi.
 
 In a terminal window, cd into the directory the images were downloaded to.
