@@ -65,14 +65,14 @@ where 2023 is the year, 01 is the month, 15 is the day.
 When you find the desired image, click on it.
 Under Assets, click on <br /> 
 ```
-enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
-OR <br />
-enosLinuxARM-odroid-n2-latest.img.xz and enosLinuxARM-odroid-n2-latest.img.xz.sha512sum <br />
+enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum
+OR
+enosLinuxARM-odroid-n2-latest.img.xz and enosLinuxARM-odroid-n2-latest.img.xz.sha512sum
 ```
 In a terminal window, cd into the directory the images were downloaded to. <br />
 ```
-$ sha512sum -c enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
-OR <br />
+$ sha512sum -c enosLinuxARM-rpi-latest.img.xz.sha512sum
+OR
 $ sha512sum -c enosLinuxARM-odroid-n2-latest.img.xz.sha512sum
 ```
 should show image check is OK
