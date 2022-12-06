@@ -57,22 +57,27 @@ exit
 
 # Method 3
 
-In your favorite browser, go to https://github.com/endeavouros-arm/images/releases
-
-look for the latest ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image
+In your favorite browser, go to https://github.com/endeavouros-arm/images/releases <br />
+look for the latest image <br />
+ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image <br />
 where 2023 is the year, 01 is the month, 15 is the day.
 
 When you find the desired image, click on it.
 Under Assets, click on <br /> 
+```
 enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
-If you want Odroid N2 image, subsitute odroid-n2 for rpi.
-
+OR <br />
+enosLinuxARM-odroid-n2-latest.img.xz and enosLinuxARM-odroid-n2-latest.img.xz.sha512sum <br />
+```
 In a terminal window, cd into the directory the images were downloaded to. <br />
-$ sha512sum -c enosLinuxARM-rpi-latest..img.xz.sha512sum <br />
+```
+$ sha512sum -c enosLinuxARM-rpi-latest..img.xz.sha512sum 
+```
 should show image check is OK
 
 Now use your favorite image burning app to transfer the img.xz file
-to a micro SD or USB SSD. gnome-disk-utility is recommended.  <br /> When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
+to a micro SD or USB SSD. gnome-disk-utility is recommended.  <br />
+When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
 6.2 GB followed by a large amount of Free Space. <br />
 On first boot, Calamares will run and resize Partition 2 to include the Free Space.
 
