@@ -28,7 +28,7 @@ Remove the uSD card or USB SSD and connect it to your RPi 4 or Odroid N2.
 The live ISO is not necessary in this procedure. <br />
 On an operational Arch Linux (or derivative) computer: <br />
 Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot. <br />
-Launch your favorite Terminal and maximize the window or make it at least 120 x 30
+Launch your favorite Terminal and maximize the window or make it at least 130 x 30
 ```bash 
 # (switch to root - enter root's password)
 su      
