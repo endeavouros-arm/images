@@ -67,8 +67,8 @@ Under Assets, click on <br />
 enosLinuxARM-rpi-latest.img.xz and enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
 If you want Odroid N2 image, subsitute odroid-n2 for rpi.
 
-In a terminal window, cd into the directory the images were downloaded to.
-$ sha512sum -c enosLinuxARM-rpi-latest..img.xz.sha512sum
+In a terminal window, cd into the directory the images were downloaded to. <br />
+$ sha512sum -c enosLinuxARM-rpi-latest..img.xz.sha512sum <br />
 should show image check is OK
 
 Now use your favorite image burning app to transfer the img.xz file
