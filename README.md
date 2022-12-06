@@ -71,7 +71,9 @@ enosLinuxARM-odroid-n2-latest.img.xz and enosLinuxARM-odroid-n2-latest.img.xz.sh
 ```
 In a terminal window, cd into the directory the images were downloaded to. <br />
 ```
-$ sha512sum -c enosLinuxARM-rpi-latest..img.xz.sha512sum 
+$ sha512sum -c enosLinuxARM-rpi-latest.img.xz.sha512sum <br />
+OR <br />
+$ sha512sum -c enosLinuxARM-odroid-n2-latest.img.xz.sha512sum
 ```
 should show image check is OK
 
