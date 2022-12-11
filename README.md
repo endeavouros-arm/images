@@ -98,7 +98,7 @@ wget https://github.com/endeavouros-arm/images/raw/main/ARM-install-server-image
 ```
 Make the script executable
 ```
-chmod 754 file:///home/don/pudges-place/scripts/ARM-install-server-image.sh
+chmod 754 ARM-install-server-image.sh
 ```
 Then execute the script and answer the prompts. Select RPi 4b 64 bit.
 ```
