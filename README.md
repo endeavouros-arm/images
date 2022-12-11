@@ -81,7 +81,7 @@ $ sha512sum -c enosLinuxARM-odroid-n2-latest.img.xz.sha512sum
 ```
 should show image check is OK
 
-Now use your favorite image burning app to transfer the img.xz file
+Now use dd or your favorite image burning app to transfer the img.xz file
 to a micro SD or USB SSD. <br />
 gnome-disk-utility is recommended.  <br />
 When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
