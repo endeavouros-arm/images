@@ -5,7 +5,7 @@
 Images for the installation of EndeavourOS on ARM devices <br />
 These images contain an EndeavourOS image complete up to including the "Desktop-Base + Common packages". <br />
 The only things missing is some personalization and configuration plus a Desktop Environment or Window Manager. <br />
-These are provided by a Calamares installer. <br />
+These are provided by a Calamares installer. <br /> <br />
 There is also a bare bones headless server image for the RPi 4b.
 
 # Installation Instructions
@@ -90,7 +90,7 @@ On first boot, Calamares will run and resize Partition 2 to include the Free Spa
 # Install headless server image on a RPi 4b.
 
 On an operational Arch Linux (or derivative) computer: <br />
-Connect a micro SD card the computer's USB port or SD slot. <br />
+Connect a micro SD card to the computer's USB port or SD slot. <br />
 Launch your favorite Terminal and maximize the window or make it at least 130 x 30 <br />
 Make a temporary directory and cd into that directory.
 ```
