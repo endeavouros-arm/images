@@ -21,6 +21,7 @@ The first method is to boot from the EndeavourOS x86_64 Live ISO available here:
 https://endeavouros.com/latest-release/
 
 Connect a target storage device to the computer, either micro SD or USB SSD. <br />
+
 Boot into the EndeavourOS live ISO. <br />
 Then click the welcome button labeled "EndeavourOS ARM Image Installer". <br />
 Answering a few questions, will start a script that installs the image for you. <br />
@@ -105,9 +106,21 @@ Then execute the script and answer the prompts. Select RPi 4b 64 bit.
 sudo ./ARM-install-server-image.sh
 ```
 Unmount the uSD and connect it to a RPi 4b with a Monitor, keyboard, and mouse. <br />
+Connect a USB 3 SSD to a USB 3 port on the RPi 4b if you want the script <br />
+to partition and format the DATA SSD. Then create mount points and modify <br />
+the /etc/fstab file to mount the DATA SSD on every bootup. <br /> <br />
+
 Boot up the RPi and you will be prompted for information to configure the server <br />
 Upon second boot, you can remove the monitor, keyboard, and mouse and run <br />
 the server headless.
+
+Go to 
+```
+https://discovery.endeavouros.com/category/arm/
+```
+and use the following HowTo's to set up a Linux LAN file server. <br />
+Homeserver 1, Homeserver 2, Homeserver 3, and Homesever 7 <br />
+There are additional HowTo's for SAMBA and miniDLNA.
 
 # Post Image Install
 
