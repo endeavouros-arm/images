@@ -108,7 +108,7 @@ sudo ./ARM-install-server-image.sh
 Unmount the uSD and connect it to a RPi 4b with a Monitor, keyboard, and mouse. <br />
 Connect a USB 3 SSD to a USB 3 port on the RPi 4b if you want the script <br />
 to partition and format the DATA SSD. Then create mount points and modify <br />
-the /etc/fstab file to mount the DATA SSD on every bootup. <br /> <br />
+the /etc/fstab file to mount the DATA SSD on every bootup. <br />
 
 Boot up the RPi and you will be prompted for information to configure the server <br />
 Upon second boot, you can remove the monitor, keyboard, and mouse and run <br />
