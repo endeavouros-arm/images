@@ -5,11 +5,14 @@
 Images for the installation of EndeavourOS on ARM devices <br />
 These images contain an EndeavourOS image complete up to including the "Desktop-Base + Common packages". <br />
 The only things missing is some personalization and configuration plus a Desktop Environment or Window Manager. <br />
-These are provided by a Calamares installer.  
+These are provided by a Calamares installer. <br />
+There is also a bare bones headless server image for the RPi 4b.
 
 # Installation Instructions
 
-There are three methods for installing EndeavourOS on either a RPi 4 or Odroid N2 ARM SOC.
+There are three methods for installing EndeavourOS on either a RPi 4 or Odroid N2 ARM SOC. <br />
+There is one method for installing a headless LAN server on a RPi 4b. Scroll to the bottom <br />
+for the headless server install.
 
 # Method one
 
@@ -29,25 +32,25 @@ The live ISO is not necessary in this procedure. <br />
 On an operational Arch Linux (or derivative) computer: <br />
 Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot. <br />
 Launch your favorite Terminal and maximize the window or make it at least 130 x 30
-```bash 
+``` 
 # (switch to root - enter root's password)
 su      
 cd /tmp
 ```
 In your tmp directory, make sure a folder named images does not exist
-```bash
+```
 git clone https://github.com/endeavouros-arm/images.git
 cd images
 ```
 check permissions, should show image-install-calamares.sh as executable.
-```bash
+```
 ./image-install-calamares.sh
 ```
 Follow the instructions.
 
 Post-Install Method 2
 After installation,
-```bash
+```
 cd ..
 # (remove the images directory)
 rm -rf images  
@@ -83,6 +86,28 @@ gnome-disk-utility is recommended.  <br />
 When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
 6.2 GB followed by a large amount of Free Space. <br />
 On first boot, Calamares will run and resize Partition 2 to include the Free Space.
+
+# Install headless server image on a RPi 4b.
+
+On an operational Arch Linux (or derivative) computer: <br />
+Connect a micro SD card the computer's USB port or SD slot. <br />
+Launch your favorite Terminal and maximize the window or make it at least 130 x 30 <br />
+Make a temporary directory and cd into that directory.
+```
+wget https://github.com/endeavouros-arm/images/raw/main/ARM-install-server-image.sh
+```
+Make the script executable
+```
+chmod 754 file:///home/don/pudges-place/scripts/ARM-install-server-image.sh
+```
+Then execute the script and answer the prompts. Select RPi 4b 64 bit.
+```
+sudo ./ARM-install-server-image.sh
+```
+Unmount the uSD and connect it to a RPi 4b with a Monitor, keyboard, and mouse. <br />
+Boot up the RPi and you will be prompted for information to configure the server <br />
+Upon second boot, you can remove the monitor, keyboard, and mouse and run <br />
+the server headless.
 
 # Post Image Install
 
