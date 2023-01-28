@@ -1,1 +1,1 @@
-Latest Beta Odroid N2 image
+Latest Odroid N2/N2+ image
