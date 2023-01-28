@@ -10,7 +10,7 @@ There is also a bare bones headless server image for the RPi 4b.
 
 # Installation Instructions
 
-There are three methods for installing EndeavourOS on either a RPi 4 or Odroid N2 ARM SOC. <br />
+There are three methods for installing EndeavourOS on a RPi 4, Odroid N2, or PineBook pro ARM SOC. <br />
 There is one method for installing a headless LAN server on a RPi 4b. Scroll to the bottom <br />
 for the headless server install.
 
@@ -28,6 +28,34 @@ Answering a few questions, will start a script that installs the image for you. 
 Remove the uSD card or USB SSD and connect it to your RPi 4 or Odroid N2.
 
 # Method two
+
+In your favorite browser, go to https://github.com/endeavouros-arm/images/releases <br />
+look for the latest image <br />
+ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image <br />
+where 2023 is the year, 01 is the month, 15 is the day.
+
+When you find the desired image, click on it.
+Under Assets, for example rpi, click on <br /> 
+```
+enosLinuxARM-rpi-latest.img.xz 
+AND
+enosLinuxARM-rpi-latest.img.xz.sha512sum
+```
+In a terminal window, cd into the directory the images were downloaded to.
+Then run <br />
+```
+$ sha512sum -c enosLinuxARM-rpi-latest.img.xz.sha512sum
+```
+should show image check is OK
+
+Now use dd or your favorite image burning app to transfer the img.xz file
+to a micro SD or USB SSD. <br />
+gnome-disk-utility is recommended.  <br />
+When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
+6.2 GB followed by a large amount of Free Space. <br />
+On first boot, Calamares will run and resize Partition 2 to include the Free Space.
+
+# Method 3
 
 The live ISO is not necessary in this procedure. <br />
 On an operational Arch Linux (or derivative) computer: <br />
@@ -58,35 +86,6 @@ rm -rf images
 # (exit root)
 exit           
 ```
-
-# Method 3
-
-In your favorite browser, go to https://github.com/endeavouros-arm/images/releases <br />
-look for the latest image <br />
-ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image <br />
-where 2023 is the year, 01 is the month, 15 is the day.
-
-When you find the desired image, click on it.
-Under Assets, for example rpi, click on <br /> 
-```
-enosLinuxARM-rpi-latest.img.xz 
-AND
-enosLinuxARM-rpi-latest.img.xz.sha512sum
-```
-In a terminal window, cd into the directory the images were downloaded to.
-Then run <br />
-```
-$ sha512sum -c enosLinuxARM-rpi-latest.img.xz.sha512sum
-```
-should show image check is OK
-
-Now use dd or your favorite image burning app to transfer the img.xz file
-to a micro SD or USB SSD. <br />
-gnome-disk-utility is recommended.  <br />
-When finished transferring the image, ROOT_EOS Partition 2 will show about <br />
-6.2 GB followed by a large amount of Free Space. <br />
-On first boot, Calamares will run and resize Partition 2 to include the Free Space.
-
 # Install headless server image on a RPi 4b.
 
 On an operational Arch Linux (or derivative) computer: <br />
