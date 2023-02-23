@@ -47,8 +47,9 @@ _install_Pinebook_image() {
     local new
     local user_confirm
 
-    tag=$(curl https://github.com/endeavouros-arm/test-images/releases | grep rootfs-pbp |  sed s'#^.*rootfs-pbp#rootfs-pbp#'g | cut -c 1-19 | head -n 1)
-    wget https://github.com/endeavouros-arm/test-images/releases/download/$tag/enosLinuxARM-pbp-latest.tar.zst
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-pbp |  sed s'#^.*rootfs-pbp#rootfs-pbp#'g | cut -c 1-19 | head -n 1)
+    printf "\n${CYAN}Downloading image enosLinuxARM-pbp-latest.tar.zst tag = $tag${NC}\n\n"
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-pbp-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -105,8 +106,9 @@ _install_OdroidN2_image() {
     local new
     local user_confirm
 
-    tag=$(curl https://github.com/endeavouros-arm/test-images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
-    wget https://github.com/endeavouros-arm/test-images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
+    printf "\n${CYAN}Downloading image enosLinuxARM-odroid-n2-latest.tar.zst tag = $tag${NC}\n\n"
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -169,8 +171,9 @@ _install_RPi4_image() {
     local totalurl
     local exit_status
 
-    tag=$(curl https://github.com/endeavouros-arm/test-images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
-    wget https://github.com/endeavouros-arm/test-images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
+    printf "\n${CYAN}Downloading image enosLinuxARM-rpi-latest.tar.zst tag = $tag${NC}\n\n"
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
