@@ -39,7 +39,7 @@ _choose_filesystem_type() {
          ext4) FILESYSTEMTYPE="ext4" ;; 
          btrfs) FILESYSTEMTYPE="btrfs" ;;
      esac
-     printf "\n\nFilesystem type = FILESYSTEMTYPE\n\n"
+     printf "\n\nFilesystem type = $FILESYSTEMTYPE\n\n"
      read z
 }
 
