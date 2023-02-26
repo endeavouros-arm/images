@@ -40,6 +40,8 @@ _choose_filesystem_type() {
             ext4) FILESYSTEMTYPE="ext4" ;;
             btrfs) FILESYSTEMTYPE="btrfs" ;;
         esac
+     else
+        FILESYSTEMTYPE="ext4"
      fi
 }
 
