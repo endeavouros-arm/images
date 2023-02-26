@@ -29,16 +29,18 @@ _partition_RPi4() {
 }
 
 _choose_filesystem_type() {
-    FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
-       "ext4" "ext4" \
-       "btrfs" "btrfs" \
-      3>&2 2>&1 1>&3)
+    if [ "$PLATFORM" != "OdroidN2" ]; then
+        FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
+           "ext4" "ext4" \
+           "btrfs" "btrfs" \
+        3>&2 2>&1 1>&3)
 
-     case $FILESYSTEMTYPE in
-         "") exit ;;
-         ext4) FILESYSTEMTYPE="ext4" ;; 
-         btrfs) FILESYSTEMTYPE="btrfs" ;;
-     esac
+        case $FILESYSTEMTYPE in
+            "") exit ;;
+            ext4) FILESYSTEMTYPE="ext4" ;;
+            btrfs) FILESYSTEMTYPE="btrfs" ;;
+        esac
+     fi
 }
 
 _install_Pinebook_image() {
