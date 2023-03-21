@@ -64,9 +64,10 @@ _install_OdroidN2_image() {
     # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    old=$(grep "setenv bootargs \"root=" /mnt/boot.ini)
-
-    sed -i "s#$old#$new#" /mnt/boot.ini
+    old=$(grep "setenv bootargs \"root=" /mnt/boot/boot.ini)
+    old=$(echo $old | awk '{print $3}')
+    new="\"root=$uuidno"
+    sed -i "s#$old#$new#" /mnt/boot/boot.ini
 }   # End of function _install_OdroidN2_image
 
 
