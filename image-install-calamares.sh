@@ -275,7 +275,7 @@ _partition_format_mount() {
    done
    ##### Determine data device size in MiB and partition ###
    printf "\n${CYAN}Partitioning, & formatting storage device...${NC}\n"
-   DEVICESIZE=$(fdisk -l | grep "Disk $DEVICENAME" | awk '{print $5}')
+   DEVICESIZE=$(fdisk -l | grep "Disk $DEVICENAME" | head -n 1 | awk '{print $5}')
    ((DEVICESIZE=$DEVICESIZE/1048576))
    ((DEVICESIZE=$DEVICESIZE-1))  # for some reason, necessary for USB thumb drives
    printf "\n${CYAN}Partitioning storage device $DEVICENAME...${NC}\n"
