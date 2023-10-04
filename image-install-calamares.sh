@@ -29,7 +29,6 @@ _partition_RPi4() {
 }
 
 _choose_filesystem_type() {
-    if [ "$PLATFORM" != "OdroidN2" ]; then
         FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
            "ext4" "ext4" \
            "btrfs" "btrfs" \
@@ -40,9 +39,6 @@ _choose_filesystem_type() {
             ext4) FILESYSTEMTYPE="ext4" ;;
             btrfs) FILESYSTEMTYPE="btrfs" ;;
         esac
-     else
-        FILESYSTEMTYPE="ext4"
-     fi
 }
 
 _install_Pinebook_image() {
@@ -393,7 +389,14 @@ Main() {
     fi
     umount MP1 MP2
     rm -rf MP1 MP2
-    rm enosLinuxARM*
+    printf "\n\n${CYAN}Remove or save downloaded image? [r/s]${NC}\n"
+    read r
+    if [[ $r == "r" || $r == "R" ]]; then
+        rm enosLinuxARM*
+        printf "\n${CYAN}image removed${NC}\n\n"
+    else
+        printf "\n${CYAN}image saved${NC}\n\n"
+    fi
 
     printf "\n\n${CYAN}End of script!${NC}\n"
     printf "\n${CYAN}Be sure to use a file manager to umount the device before removing the USB SD reader${NC}\n"
