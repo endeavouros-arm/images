@@ -125,10 +125,10 @@ _install_OdroidN2_image() {
         mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
     fi
 
-    printf "\n\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
+    printf "\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
     pv "enosLinuxARM-odroid-n2-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
-    printf "\n\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
+    printf "\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
     sync
     mv MP2/boot/* MP1
     dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
@@ -141,14 +141,15 @@ _install_OdroidN2_image() {
     printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" >> MP2/etc/fstab
     printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> MP2/etc/fstab
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
-    printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
+    printf "$uuidno  /boot  vfat  defaults  0  0\n\n" >> MP2/etc/fstab
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -U MP2 >> MP2/etc/fstab
+        sed -i '/# \/dev\/sd*/d' MP2/etc/fstab
         sed -i 's/subvolid=.*,//g' MP2/etc/fstab
-        sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
+        sed -i '/swap/d' MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i '/zram/d' MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
-    # make /boot/boot.ini work with a UUID instead of a lable such as /dev/sda
+    # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(grep "setenv bootargs \"root=" MP1/boot.ini)
@@ -201,17 +202,19 @@ _install_RPi4_image() {
     mv MP2/etc/fstab MP2/etc/fstab-bkup
     uuidno=$(lsblk -o UUID $PARTNAME1)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" >> MP2/etc/fstab
+    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > MP2/etc/fstab
     printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> MP2/etc/fstab
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
-    printf "$uuidno  /boot  vfat  defaults  0  0\n" >> MP2/etc/fstab
+    printf "$uuidno  /boot  vfat  defaults  0  0\n\n" >> MP2/etc/fstab
     # make /boot/cmdline.txt work with a UUID instead of a lable such as /dev/sda
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -U MP2 >> MP2/etc/fstab
+        sed -i '/# \/dev\/sd*/d' MP2/etc/fstab
         sed -i 's/subvolid=.*,//g' MP2/etc/fstab
-        sed -i /swap/d MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i /zram/d MP2/etc/fstab   # Remove any zram carried over from the host device
+        sed -i '/swap/d' MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i '/zram/d' MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
+
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' MP1/cmdline.txt)
@@ -295,7 +298,7 @@ _partition_format_mount() {
    esac
    printf "\npartition name = $DEVICENAME\n\n" >> /root/enosARM.log
    printf "\n${CYAN}Formatting storage device $DEVICENAME...${NC}\n"
-   printf "\n${CYAN}If \"/dev/sdx contains an existing file system Labelled XXXX\" or similar appears, Enter: y${NC}\n\n\n"
+   printf "\n${CYAN}If \"/dev/sdx contains an existing file system Labelled XXXX\" or similar appears, Enter: y${NC}\n\n"
 
    if [[ ${DEVICENAME:5:6} = "mmcblk" ]] || [[ ${DEVICENAME:5:4} = "nvme" ]]
    then
@@ -382,23 +385,23 @@ Main() {
        Pinebook) _install_Pinebook_image ;;
     esac
 
-    printf "\n\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n\n"
+    printf "\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n"
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
        umount MP2/home MP2/var/log MP2/var/cache
     fi
     umount MP1 MP2
     rm -rf MP1 MP2
-    printf "\n\n${CYAN}Remove or save downloaded image? [r/s]${NC}\n"
-    read r
+    printf "\n${CYAN}Remove or save downloaded image? [r/s]${NC} "
+    read -n 1 r
     if [[ $r == "r" || $r == "R" ]]; then
         rm enosLinuxARM*
-        printf "\n${CYAN}image removed${NC}\n\n"
+        printf "\n${CYAN}image removed${NC}\n"
     else
-        printf "\n${CYAN}image saved${NC}\n\n"
+        printf "\n${CYAN}image saved${NC}\n"
     fi
 
-    printf "\n\n${CYAN}End of script!${NC}\n"
+    printf "\n${CYAN}End of script!${NC}\n"
     printf "\n${CYAN}Be sure to use a file manager to umount the device before removing the USB SD reader${NC}\n"
 
     printf "\n${CYAN}The default user is ${NC}alarm${CYAN} with the password ${NC}alarm\n"
