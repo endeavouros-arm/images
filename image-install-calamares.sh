@@ -1,5 +1,18 @@
 #!/bin/bash
 
+_partition_Radxa5b() {
+    wget https://github.com/endeavouros-arm/plasma-image/raw/main/configs/rk3588-uboot.img
+    dd if=/dev/zero of=$DEVICENAME bs=1M count=18
+    dd if=rk3588-uboot.img of=$DEVICENAME
+#    dd if=$WORKDIR/configs/rk3588-uboot.img ibs=1 skip=0 count=15728640 of=$DEVICENAME
+    parted --script -a minimal $DEVICENAME \
+    mklabel gpt \
+    mkpart primary 17MB 266MB \
+    mkpart primary 266MB $DEVICESIZE"MiB" \
+    quit
+    rm rk3588-uboot.img
+}
+
 _partition_Pinebook() {
     dd if=/dev/zero of=$DEVICENAME bs=1M count=16
     parted --script -a minimal $DEVICENAME \
@@ -40,6 +53,65 @@ _choose_filesystem_type() {
             btrfs) FILESYSTEMTYPE="btrfs" ;;
         esac
 }
+
+_install_Radxa5b_image() {
+
+    local uuidMP1
+    local uuidMP2
+    local old
+    local new
+
+#    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-25 | head -n 1)
+#    printf "\n${CYAN}Downloading image enosLinuxARM-radxa-5b-latest.tar.zst tag = $tag${NC}\n\n"
+#    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-radxa-5b-latest.tar.zst
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
+        btrfs subvolume create MP2/@
+        btrfs subvolume create MP2/@home
+        btrfs subvolume create MP2/@log
+        btrfs subvolume create MP2/@cache
+        umount MP2
+        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
+        mount -o $o_btrfs,subvol=@ $PARTNAME2 MP2
+        mkdir -p MP2/{boot,home,var/log,var/cache}
+        mount -o $o_btrfs,subvol=@home $PARTNAME2 MP2/home
+        mount -o $o_btrfs,subvol=@log $PARTNAME2 MP2/var/log
+       mount -o $o_btrfs,subvol=@cache $PARTNAME2 MP2/var/cache
+    fi
+
+    printf "\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
+    pv "enosLinuxARM-radxa-5b-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
+    printf "\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
+    sync
+    mv MP2/boot/* MP1
+
+    # change fstab to UUID instead of partition label
+    mv MP2/etc/fstab MP2/etc/fstab-bkup
+    uuidMP1=$(lsblk -o UUID $PARTNAME1)
+    uuidMP1=$(echo $uuidMP1 | sed 's/ /=/g')
+    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > MP2/etc/fstab
+    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> MP2/etc/fstab
+    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> MP2/etc/fstab
+    printf "$uuidMP1  /boot  vfat  defaults  0  0\n\n" >> MP2/etc/fstab
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        genfstab -U MP2 >> MP2/etc/fstab
+        sed -i '/# \/dev\/sd*/d' MP2/etc/fstab
+        sed -i 's/subvolid=.*,//g' MP2/etc/fstab
+        sed -i '/swap/d' MP2/etc/fstab   # Remove any swap carried over from the host device
+        sed -i '/zram/d' MP2/etc/fstab   # Remove any zram carried over from the host device
+    fi
+
+    # change extlinux.conf to UUID instead of partition label.
+    uuidMP2=$(lsblk -o UUID $PARTNAME2)
+    uuidMP2=$(echo $uuidMP2 | sed 's/ /=/g')
+    old=$(grep 'root=' MP1/extlinux/extlinux.conf | awk '{print $2}')
+    new="root=$uuidMP2"
+    sed -i "s#$old#$new#" MP1/extlinux/extlinux.conf
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        sed -i 's/rootfstype=ext4/rootfstype=btrfs rootflags=subvol=@ fsck.repair=no/' MP1/extlinux/extlinux.conf
+    fi
+}   # End of function _install_Radxa5b_image
 
 _install_Pinebook_image() {
     local uuidno
@@ -106,9 +178,9 @@ _install_OdroidN2_image() {
     local new
     local user_confirm
 
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
-    printf "\n${CYAN}Downloading image enosLinuxARM-odroid-n2-latest.tar.zst tag = $tag${NC}\n\n"
-    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
+#    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
+#    printf "\n${CYAN}Downloading image enosLinuxARM-odroid-n2-latest.tar.zst tag = $tag${NC}\n\n"
+#    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -126,12 +198,11 @@ _install_OdroidN2_image() {
     fi
 
     printf "\n${CYAN}Untarring the image...takes 4 to 5 minutes.${NC}\n"
-    pv "enosLinuxARM-odroid-n2-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
-    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C MP2
+    pv "enosLinuxARM-radxa-5b-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-radxa-5b-latest.tar.zst -C MP2
     printf "\n${CYAN}syncing files...takes 4 to 5 minutes.${NC}\n"
     sync
     mv MP2/boot/* MP1
-    dd if=MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
 
     # make /etc/fstab work with a UUID instead of a label such as /dev/sda
     printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
@@ -152,14 +223,14 @@ _install_OdroidN2_image() {
     # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    old=$(grep "setenv bootargs \"root=" MP1/boot.ini)
+    old=$(grep "root=" MP1/boot.ini | awk '{print $2}')
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         boot_options="rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
         new="setenv bootargs \"root=$uuidno $boot_options rootwait rw\""
         sed -i "s#fsck.repair=yes ##" MP1/boot.ini
     else
-        new="setenv bootargs \"root=$uuidno rootwait rw\""
+        new="root=$uuidno"
     fi
     sed -i "s#$old#$new#" MP1/boot.ini
 }   # End of function _install_OdroidN2_image
@@ -172,9 +243,9 @@ _install_RPi4_image() {
     local totalurl
     local exit_status
 
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
-    printf "\n${CYAN}Downloading image enosLinuxARM-rpi-latest.tar.zst tag = $tag${NC}\n\n"
-    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
+#    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
+#    printf "\n${CYAN}Downloading image enosLinuxARM-rpi-latest.tar.zst tag = $tag${NC}\n\n"
+#    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
@@ -295,8 +366,8 @@ _partition_format_mount() {
        Pinebook)   _partition_Pinebook ;;
        OdroidN2)   _partition_OdroidN2 ;;
        RPi64)      _partition_RPi4 ;;
+       Radxa5b)    _partition_Radxa5b ;;
    esac
-   printf "\npartition name = $DEVICENAME\n\n" >> /root/enosARM.log
    printf "\n${CYAN}Formatting storage device $DEVICENAME...${NC}\n"
    printf "\n${CYAN}If \"/dev/sdx contains an existing file system Labelled XXXX\" or similar appears, Enter: y${NC}\n\n"
 
@@ -308,8 +379,8 @@ _partition_format_mount() {
    mkfs.fat $PARTNAME1   2>> /root/enosARM.log
    PARTNAME2=$DEVICENAME"2"
    case $FILESYSTEMTYPE in
-       ext4) mkfs.ext4 -F $PARTNAME2   2>> /root/enosARM.log ;;
-       btrfs) mkfs.btrfs -f $PARTNAME2   2>> /root/enosARM.log ;;
+       ext4) mkfs.ext4 -F $PARTNAME2 ;;
+       btrfs) mkfs.btrfs -f $PARTNAME2 ;;
    esac
    mkdir MP1 MP2
    mount $PARTNAME1 MP1
@@ -342,6 +413,7 @@ _choose_device() {
          "0" "Raspberry Pi 4b 64 bit" \
          "1" "Odroid N2 or N2+" \
          "2" "Pinebook Pro" \
+         "3" "Radxa ROCK 5B" \
     3>&2 2>&1 1>&3)
 
     case $PLATFORM in
@@ -350,6 +422,7 @@ _choose_device() {
          0) PLATFORM="RPi64" ;;
          1) PLATFORM="OdroidN2" ;;
          2) PLATFORM="Pinebook" ;;
+         3) PLATFORM="Radxa5b" ;;
     esac
 }
 
@@ -366,6 +439,7 @@ Main() {
     PARTNAME2=" "
     FILESYSTEMTYPE=""
     CONFIG_UPDATE="config-update-V2.7.sh"
+    WORKDIR=$(pwd)
 
     # Declare color variables
     GREEN='\033[0;32m'
@@ -383,6 +457,7 @@ Main() {
        OdroidN2)   _install_OdroidN2_image ;;
        RPi64)      _install_RPi4_image ;;
        Pinebook) _install_Pinebook_image ;;
+       Radxa5b) _install_Radxa5b_image ;;
     esac
 
     printf "\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n"
@@ -394,11 +469,11 @@ Main() {
     rm -rf MP1 MP2
     printf "\n${CYAN}Remove or save downloaded image? [r/s]${NC} "
     read -n 1 r
-    if [[ $r == "r" || $r == "R" ]]; then
+    if [[ $r == "s" || $r == "S" ]]; then
+        printf "\n${CYAN}image saved${NC}\n"
+    else
         rm enosLinuxARM*
         printf "\n${CYAN}image removed${NC}\n"
-    else
-        printf "\n${CYAN}image saved${NC}\n"
     fi
 
     printf "\n${CYAN}End of script!${NC}\n"
