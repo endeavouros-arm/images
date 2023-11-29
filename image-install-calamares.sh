@@ -41,59 +41,33 @@ _partition_RPi4() {
     quit
 }
 
-_choose_filesystem_type() {
-        FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
-           "ext4" "ext4" \
-           "btrfs" "btrfs" \
-        3>&2 2>&1 1>&3)
+_create_btrfs_subvolumes() {
+    printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
+    btrfs subvolume create $WORKDIR/MP2/@
+    btrfs subvolume create $WORKDIR/MP2/@home
+    btrfs subvolume create $WORKDIR/MP2/@log
+    btrfs subvolume create $WORKDIR/MP2/@cache
+    umount $WORKDIR/MP2
+    o_btrfs=defaults,compress=zstd:4,noatime,commit=120
+    mount -o $o_btrfs,subvol=@ $PARTNAME2 $WORKDIR/MP2
+    mkdir -p $WORKDIR/MP2/{boot,home,var/log,var/cache}
+    mount -o $o_btrfs,subvol=@home $PARTNAME2 $WORKDIR/MP2/home
+    mount -o $o_btrfs,subvol=@log $PARTNAME2 $WORKDIR/MP2/var/log
+    mount -o $o_btrfs,subvol=@cache $PARTNAME2 $WORKDIR/MP2/var/cache
+}   # end of function _create_btrfs_subvolumes
 
-        case $FILESYSTEMTYPE in
-            "") exit ;;
-            ext4) FILESYSTEMTYPE="ext4" ;;
-            btrfs) FILESYSTEMTYPE="btrfs" ;;
-        esac
-}
+_fstab_uuid() {
 
-_install_Radxa5b_image() {
+    local fstabuuid
 
-    local uuidMP1
-    local uuidMP2
-    local old
-    local new
-
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-25 | head -n 1)
-    printf "\n${CYAN}Downloading image enosLinuxARM-radxa-5b-latest.tar.zst tag = $tag${NC}\n\n"
-    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-radxa-5b-latest.tar.zst
-    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
-        btrfs subvolume create $WORKDIR/MP2/@
-        btrfs subvolume create $WORKDIR/MP2/@home
-        btrfs subvolume create $WORKDIR/MP2/@log
-        btrfs subvolume create $WORKDIR/MP2/@cache
-        umount $WORKDIR/MP2
-        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
-        mount -o $o_btrfs,subvol=@ $PARTNAME2 $WORKDIR/MP2
-        mkdir -p $WORKDIR/MP2/{boot,home,var/log,var/cache}
-        mount -o $o_btrfs,subvol=@home $PARTNAME2 $WORKDIR/MP2/home
-        mount -o $o_btrfs,subvol=@log $PARTNAME2 $WORKDIR/MP2/var/log
-       mount -o $o_btrfs,subvol=@cache $PARTNAME2 $WORKDIR/MP2/var/cache
-    fi
-
-    printf "\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
-    pv "enosLinuxARM-radxa-5b-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
-    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C $WORKDIR/MP2
-    printf "\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
-    sync
-    mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
-
-    # change fstab to UUID instead of partition label
+    printf "\n${CYAN}Changing /etc/fstab to UUID numbers instead of a lable such as /dev/sda.${NC}\n"
     mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
-    uuidMP1=$(lsblk -o UUID $PARTNAME1)
-    uuidMP1=$(echo $uuidMP1 | sed 's/ /=/g')
+    fstabuuid=$(lsblk -o UUID $PARTNAME1)
+    fstabuuid=$(echo $fstabuuid | sed 's/ /=/g')
     printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
     printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> $WORKDIR/MP2/etc/fstab
-    printf "$uuidMP1  /boot  vfat  defaults  0  0\n\n" >> $WORKDIR/MP2/etc/fstab
+    printf "$fstabuuid  /boot  vfat  defaults  0  0\n\n" >> $WORKDIR/MP2/etc/fstab
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         genfstab -U $WORKDIR/MP2 >> $WORKDIR/MP2/etc/fstab
         sed -i '/# \/dev\/sd*/d' $WORKDIR/MP2/etc/fstab
@@ -101,12 +75,32 @@ _install_Radxa5b_image() {
         sed -i '/swap/d' $WORKDIR/MP2/etc/fstab   # Remove any swap carried over from the host device
         sed -i '/zram/d' $WORKDIR/MP2/etc/fstab   # Remove any zram carried over from the host device
     fi
+}   # end of function _fstab_uuid
 
+_install_Radxa5b_image() {
+
+    local uuidno
+    local old
+    local new
+
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-25 | head -n 1)
+    printf "\n${CYAN}Downloading image enosLinuxARM-radxa-5b-latest.tar.zst tag = $tag${NC}\n\n"
+    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-radxa-5b-latest.tar.zst
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+       _create_btrfs_subvolumes
+    fi
+    printf "\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
+    pv "enosLinuxARM-radxa-5b-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
+    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C $WORKDIR/MP2
+    printf "\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
+    sync
+    mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
+    _fstab_uuid
     # change extlinux.conf to UUID instead of partition label.
-    uuidMP2=$(lsblk -o UUID $PARTNAME2)
-    uuidMP2=$(echo $uuidMP2 | sed 's/ /=/g')
+    uuidno=$(lsblk -o UUID $PARTNAME2)
+    uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $2}')
-    new="root=$uuidMP2"
+    new="root=$uuidno"
     sed -i "s#$old#$new#" $WORKDIR/MP1/extlinux/extlinux.conf
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         sed -i 's/rootfstype=ext4/rootfstype=btrfs rootflags=subvol=@ fsck.repair=no/' $WORKDIR/MP1/extlinux/extlinux.conf
@@ -117,27 +111,13 @@ _install_Pinebook_image() {
     local uuidno
     local old
     local new
-    local user_confirm
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-pbp |  sed s'#^.*rootfs-pbp#rootfs-pbp#'g | cut -c 1-19 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-pbp-latest.tar.zst tag = $tag${NC}\n\n"
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-pbp-latest.tar.zst
-
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
-        btrfs subvolume create $WORKDIR/MP2/@
-        btrfs subvolume create $WORKDIR/MP2/@home
-        btrfs subvolume create $WORKDIR/MP2/@log
-        btrfs subvolume create $WORKDIR/MP2/@cache
-        umount $WORKDIR/MP2
-        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
-        mount -o $o_btrfs,subvol=@ $PARTNAME2 $WORKDIR/MP2
-        mkdir -p $WORKDIR/MP2/{boot,home,var/log,var/cache}
-        mount -o $o_btrfs,subvol=@home $PARTNAME2 $WORKDIR/MP2/home
-        mount -o $o_btrfs,subvol=@log $PARTNAME2 $WORKDIR/MP2/var/log
-        mount -o $o_btrfs,subvol=@cache $PARTNAME2 $WORKDIR/MP2/var/cache
+        _create_btrfs_subvolumes
     fi
-
     printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
     pv "enosLinuxARM-pbp-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-pbp-latest.tar.zst -C $WORKDIR/MP2
@@ -145,22 +125,7 @@ _install_Pinebook_image() {
     sync
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
     dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
-
-    # make /etc/fstab work with a UUID instead of a label such as /dev/sda
-    printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
-    mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
-    uuidno=$(lsblk -o UUID $PARTNAME1)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
-    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
-    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> $WORKDIR/MP2/etc/fstab
-    printf "$uuidno  /boot  vfat  defaults  0  0\n" >> $WORKDIR/MP2/etc/fstab
-    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -U $WORKDIR/MP2 >> $WORKDIR/MP2/etc/fstab
-        sed -i 's/subvolid=.*,//g' $WORKDIR/MP2/etc/fstab
-        sed -i /swap/d $WORKDIR/MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i /zram/d $WORKDIR/MP2/etc/fstab   # Remove any zram carried over from the host device
-    fi
+    _fstab_uuid
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
@@ -176,27 +141,13 @@ _install_OdroidN2_image() {
     local uuidno
     local old
     local new
-    local user_confirm
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-odroid-n2-latest.tar.zst tag = $tag${NC}\n\n"
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-odroid-n2-latest.tar.zst
-
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
-        btrfs subvolume create $WORKDIR/MP2/@
-        btrfs subvolume create $WORKDIR/MP2/@home
-        btrfs subvolume create $WORKDIR/MP2/@log
-        btrfs subvolume create $WORKDIR/MP2/@cache
-        umount $WORKDIR/MP2
-        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
-        mount -o $o_btrfs,subvol=@ $PARTNAME2 $WORKDIR/MP2
-        mkdir -p $WORKDIR/MP2/{boot,home,var/log,var/cache}
-        mount -o $o_btrfs,subvol=@home $PARTNAME2 $WORKDIR/MP2/home
-        mount -o $o_btrfs,subvol=@log $PARTNAME2 $WORKDIR/MP2/var/log
-        mount -o $o_btrfs,subvol=@cache $PARTNAME2 $WORKDIR/MP2/var/cache
+        _create_btrfs_subvolumes
     fi
-
     printf "\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
     pv "enosLinuxARM-odroid-n2-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-odroid-n2-latest.tar.zst -C $WORKDIR/MP2
@@ -204,22 +155,7 @@ _install_OdroidN2_image() {
     sync
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
     dd if=$WORKDIR/MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
-    # make /etc/fstab work with a UUID instead of a label such as /dev/sda
-    printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
-    mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
-    uuidno=$(lsblk -o UUID $PARTNAME1)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
-    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
-    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> $WORKDIR/MP2/etc/fstab
-    printf "$uuidno  /boot  vfat  defaults  0  0\n\n" >> $WORKDIR/MP2/etc/fstab
-    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -U $WORKDIR/MP2 >> $WORKDIR/MP2/etc/fstab
-        sed -i '/# \/dev\/sd*/d' $WORKDIR/MP2/etc/fstab
-        sed -i 's/subvolid=.*,//g' $WORKDIR/MP2/etc/fstab
-        sed -i '/swap/d' $WORKDIR/MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i '/zram/d' $WORKDIR/MP2/etc/fstab   # Remove any zram carried over from the host device
-    fi
+    _fstab_uuid
     # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
@@ -237,53 +173,21 @@ _install_RPi4_image() {
     local uuidno
     local old
     local new
-    local url
-    local totalurl
-    local exit_status
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-rpi-latest.tar.zst tag = $tag${NC}\n\n"
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
-
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        printf "\n\n${CYAN}Creating btrfs Subvolumes${NC}\n"
-        btrfs subvolume create $WORKDIR/MP2/@
-        btrfs subvolume create $WORKDIR/MP2/@home
-        btrfs subvolume create $WORKDIR/MP2/@log
-        btrfs subvolume create $WORKDIR/MP2/@cache
-        umount $WORKDIR/MP2
-        o_btrfs=defaults,compress=zstd:4,noatime,commit=120
-        mount -o $o_btrfs,subvol=@ $PARTNAME2 $WORKDIR/MP2
-        mkdir -p $WORKDIR/MP2/{boot,home,var/log,var/cache}
-        mount -o $o_btrfs,subvol=@home $PARTNAME2 $WORKDIR/MP2/home
-        mount -o $o_btrfs,subvol=@log $PARTNAME2 $WORKDIR/MP2/var/log
-        mount -o $o_btrfs,subvol=@cache $PARTNAME2 $WORKDIR/MP2/var/cache
+        _create_btrfs_subvolumes
     fi
-
     printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
     pv "enosLinuxARM-rpi-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C $WORKDIR/MP2
     printf "\n\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
     sync
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
-    # make /etc/fstab work with a UUID instead of a label such as /dev/sda
-    printf "\n${CYAN}In /etc/fstab and /boot/cmdline.txt changing Disk labels to UUID numbers.${NC}\n"
-    mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
-    uuidno=$(lsblk -o UUID $PARTNAME1)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
-    printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
-    printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> $WORKDIR/MP2/etc/fstab
-    printf "$uuidno  /boot  vfat  defaults  0  0\n\n" >> $WORKDIR/MP2/etc/fstab
-    # make /boot/cmdline.txt work with a UUID instead of a lable such as /dev/sda
-    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        genfstab -U $WORKDIR/MP2 >> $WORKDIR/MP2/etc/fstab
-        sed -i '/# \/dev\/sd*/d' $WORKDIR/MP2/etc/fstab
-        sed -i 's/subvolid=.*,//g' $WORKDIR/MP2/etc/fstab
-        sed -i '/swap/d' $WORKDIR/MP2/etc/fstab   # Remove any swap carried over from the host device
-        sed -i '/zram/d' $WORKDIR/MP2/etc/fstab   # Remove any zram carried over from the host device
-    fi
-
+    _fstab_uuid
+    # configure cmdline.txt to use UUIDs instead of partition lables
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' $WORKDIR/MP1/cmdline.txt)
@@ -423,6 +327,19 @@ _choose_device() {
     esac
 }
 
+_choose_filesystem_type() {
+        FILESYSTEMTYPE=$(whiptail --title "EndeavourOS ARM Setup - Filesystem type" --menu --notags "\n              Use the arrow keys to choose the filesystem type\n                         or Cancel to abort script\n\n" 15 80 5 \
+           "ext4" "ext4" \
+           "btrfs" "btrfs" \
+        3>&2 2>&1 1>&3)
+
+        case $FILESYSTEMTYPE in
+            "") exit ;;
+            ext4) FILESYSTEMTYPE="ext4" ;;
+            btrfs) FILESYSTEMTYPE="btrfs" ;;
+        esac
+}
+
 #################################################
 # beginning of script
 #################################################
@@ -471,6 +388,7 @@ Main() {
     printf "\n${CYAN}The default user is ${NC}alarm${CYAN} with the password ${NC}alarm\n"
     printf "${CYAN}The default root password is ${NC}root\n\n\n"
     read -n 1 -s -r -p "Press any key to continue"
+    printf "\n"
     exit
 }
 
