@@ -83,7 +83,7 @@ _install_Radxa5b_image() {
     local old
     local new
 
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-25 | head -n 1)
+    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-24 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-radxa-5b-latest.tar.zst tag = $tag${NC}\n\n"
     wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-radxa-5b-latest.tar.zst
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
