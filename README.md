@@ -1,6 +1,6 @@
 # ARM Images
  
- [![Maintenance](https://img.shields.io/maintenance/yes/2022.svg)]() [![Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)]()
+ [![Maintenance](https://img.shields.io/maintenance/yes/2023.svg)]() [![Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)]()
  
 Images for the installation of EndeavourOS on ARM devices <br />
 These images contain an EndeavourOS image complete up to including the "Desktop-Base + Common packages". <br />
