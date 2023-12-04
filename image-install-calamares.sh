@@ -120,21 +120,20 @@ _install_Pinebook_image() {
     fi
     printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
     pv "enosLinuxARM-pbp-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
-    # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-pbp-latest.tar.zst -C $WORKDIR/MP2
     printf "\n\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
     sync
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
-    dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
     _fstab_uuid
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    old=$(grep -o 'root=.* ' $WORKDIR/MP1/extlinux/extlinux.conf)
+    old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $5}')
     case $FILESYSTEMTYPE in
-        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no rw rootwait" ;;
-         ext4) new="root=$uuidno rw rootwait" ;;
+        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no" ;;
+        ext4) new="root=$uuidno" ;;
     esac
-    sed -i "s#$old#$new #" $WORKDIR/MP1/extlinux/extlinux.conf
+    sed -i "s#$old#$new#" $WORKDIR/MP1/extlinux/extlinux.conf
+    dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
 }   # End of function _install_Pinebook_image
 
 _install_OdroidN2_image() {
