@@ -276,11 +276,11 @@ _partition_format_mount() {
       DEVICENAME=$DEVICENAME"p"
    fi
    PARTNAME1=$DEVICENAME"1"
-   mkfs.fat $PARTNAME1
+   mkfs.fat -n BOOT_EOS $PARTNAME1
    PARTNAME2=$DEVICENAME"2"
    case $FILESYSTEMTYPE in
-       ext4) mkfs.ext4 -F $PARTNAME2 ;;
-       btrfs) mkfs.btrfs -f $PARTNAME2 ;;
+       ext4) mkfs.ext4 -F -L ROOT_EOS $PARTNAME2 ;;
+       btrfs) mkfs.btrfs -f -L ROOT_EOS $PARTNAME2 ;;
    esac
    mkdir $WORKDIR/MP1 $WORKDIR/MP2
    mount $PARTNAME1 $WORKDIR/MP1
