@@ -322,7 +322,7 @@ _check_all_apps_closed() {
 }
 
 _choose_device() {
-    PLATFORM=$(whiptail --title " SBC Model Selection" --menu --notags "\n            Choose which SBC to install or Press right arrow twice to cancel" 17 100 4 \
+    PLATFORM=$(whiptail --title " SBC Model Selection" --menu --notags "\n            Choose which SBC to install or Press right arrow twice to cancel" 17 100 6 \
          "0" "Raspberry Pi 4 model B 64 bit" \
          "1" "Raspberry Pi 5 model B 64 bit" \
          "2" "Odroid N2 or N2+" \
