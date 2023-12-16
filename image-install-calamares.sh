@@ -326,8 +326,8 @@ _choose_device() {
          "0" "Raspberry Pi 4 model B 64 bit" \
          "1" "Raspberry Pi 5 model B 64 bit" \
          "2" "Odroid N2 or N2+" \
-         "2" "Pinebook Pro" \
-         "2" "Radxa ROCK 5B" \
+         "3" "Pinebook Pro" \
+         "4" "Radxa ROCK 5B" \
     3>&2 2>&1 1>&3)
 
     case $PLATFORM in
