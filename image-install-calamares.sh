@@ -173,14 +173,27 @@ _install_RPi4_image() {
     local old
     local new
 
-    tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi |  sed s'#^.*rootfs-rpi#rootfs-rpi#'g | cut -c 1-19 | head -n 1)
-    printf "\n${CYAN}Downloading image enosLinuxARM-rpi-latest.tar.zst tag = $tag${NC}\n\n"
-    wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi-latest.tar.zst
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         _create_btrfs_subvolumes
     fi
-    printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
-    pv "enosLinuxARM-rpi-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
+
+    case $PLATFORM in
+       Rpi4)
+           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi4 |  sed s'#^.*rootfs-rpi4#rootfs-rpi4#'g | cut -c 1-19 | head -n 1)
+           printf "\n${CYAN}Downloading image enosLinuxARM-rpi4-latest.tar.zst tag = $tag${NC}\n\n"
+           wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi4-latest.tar.zst
+           printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
+           pv "enosLinuxARM-rpi4-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
+           ;;
+       Rpi5)
+           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi5 |  sed s'#^.*rootfs-rpi5#rootfs-rpi5#'g | cut -c 1-19 | head -n 1)
+           printf "\n${CYAN}Downloading image enosLinuxARM-rpi5-latest.tar.zst tag = $tag${NC}\n\n"
+           wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi5-latest.tar.zst
+           printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
+           pv "enosLinuxARM-rpi5-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
+           ;;
+    esac
+
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C $WORKDIR/MP2
     printf "\n\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
     sync
@@ -263,10 +276,10 @@ _partition_format_mount() {
    fi
    rm mounts
    case $PLATFORM in
-       Pinebook)   _partition_Pinebook ;;
-       OdroidN2)   _partition_OdroidN2 ;;
-       RPi64)      _partition_RPi4 ;;
-       Radxa5b)    _partition_Radxa5b ;;
+       Pinebook)     _partition_Pinebook ;;
+       OdroidN2)     _partition_OdroidN2 ;;
+       Rpi4 | Rpi5)  _partition_RPi4 ;;
+       Radxa5b)      _partition_Radxa5b ;;
    esac
    printf "\n${CYAN}Formatting storage device $DEVICENAME...${NC}\n"
    printf "\n${CYAN}If \"/dev/sdx contains an existing file system Labelled XXXX\" or similar appears, Enter: y${NC}\n\n"
@@ -310,19 +323,21 @@ _check_all_apps_closed() {
 
 _choose_device() {
     PLATFORM=$(whiptail --title " SBC Model Selection" --menu --notags "\n            Choose which SBC to install or Press right arrow twice to cancel" 17 100 4 \
-         "0" "Raspberry Pi 4b 64 bit" \
-         "1" "Odroid N2 or N2+" \
+         "0" "Raspberry Pi 4 model B 64 bit" \
+         "1" "Raspberry Pi 5 model B 64 bit" \
+         "2" "Odroid N2 or N2+" \
          "2" "Pinebook Pro" \
-         "3" "Radxa ROCK 5B" \
+         "2" "Radxa ROCK 5B" \
     3>&2 2>&1 1>&3)
 
     case $PLATFORM in
         "") printf "\n\nScript aborted by user..${NC}\n\n"
             exit ;;
-         0) PLATFORM="RPi64" ;;
-         1) PLATFORM="OdroidN2" ;;
-         2) PLATFORM="Pinebook" ;;
-         3) PLATFORM="Radxa5b" ;;
+         0) PLATFORM="Rpi4" ;;
+         1) PLATFORM="Rpi5" ;;
+         2) PLATFORM="OdroidN2" ;;
+         3) PLATFORM="Pinebook" ;;
+         4) PLATFORM="Radxa5b" ;;
     esac
 }
 
@@ -367,10 +382,10 @@ Main() {
     _choose_filesystem_type
     _partition_format_mount  # function to partition, format, and mount a uSD card or eMMC card
     case $PLATFORM in
-       OdroidN2)   _install_OdroidN2_image ;;
-       RPi64)      _install_RPi4_image ;;
-       Pinebook) _install_Pinebook_image ;;
-       Radxa5b) _install_Radxa5b_image ;;
+       OdroidN2)    _install_OdroidN2_image ;;
+       Rpi4 | Rpi5) _install_RPi4_image ;;
+       Pinebook)    _install_Pinebook_image ;;
+       Radxa5b)     _install_Radxa5b_image ;;
     esac
 
     printf "\n${CYAN}Almost done! Just a couple of minutes more for the last step.${NC}\n"
