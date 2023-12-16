@@ -123,6 +123,7 @@ _install_Pinebook_image() {
     printf "\n\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
     sync
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
+    dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
     _fstab_uuid
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
@@ -133,7 +134,6 @@ _install_Pinebook_image() {
         ext4) new="root=$uuidno" ;;
     esac
     sed -i "s#$old#$new#" $WORKDIR/MP1/extlinux/extlinux.conf
-    dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
 }   # End of function _install_Pinebook_image
 
 _install_OdroidN2_image() {
