@@ -179,14 +179,14 @@ _install_RPi4_image() {
 
     case $PLATFORM in
        Rpi4)
-           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi4 |  sed s'#^.*rootfs-rpi4#rootfs-rpi4#'g | cut -c 1-19 | head -n 1)
+           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi4 |  sed s'#^.*rootfs-rpi4#rootfs-rpi4#'g | cut -c 1-20 | head -n 1)
            printf "\n${CYAN}Downloading image enosLinuxARM-rpi4-latest.tar.zst tag = $tag${NC}\n\n"
            wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi4-latest.tar.zst
            printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
            pv "enosLinuxARM-rpi4-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
            ;;
        Rpi5)
-           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi5 |  sed s'#^.*rootfs-rpi5#rootfs-rpi5#'g | cut -c 1-19 | head -n 1)
+           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi5 |  sed s'#^.*rootfs-rpi5#rootfs-rpi5#'g | cut -c 1-20 | head -n 1)
            printf "\n${CYAN}Downloading image enosLinuxARM-rpi5-latest.tar.zst tag = $tag${NC}\n\n"
            wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi5-latest.tar.zst
            printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
