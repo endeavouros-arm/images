@@ -179,7 +179,7 @@ _install_RPi4_image() {
 
     case $PLATFORM in
        Rpi4)
-           tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi4 |  sed s'#^.*rootfs-rpi4#rootfs-rpi4#'g | cut -c 1-20 | head -n 1)
+          tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-rpi4 |  sed s'#^.*rootfs-rpi4#rootfs-rpi4#'g | cut -c 1-20 | head -n 1)
            printf "\n${CYAN}Downloading image enosLinuxARM-rpi4-latest.tar.zst tag = $tag${NC}\n\n"
            wget https://github.com/endeavouros-arm/images/releases/download/$tag/enosLinuxARM-rpi4-latest.tar.zst
            printf "\n\n${CYAN}Untarring the image...can take up to 5 minutes.${NC}\n"
@@ -193,7 +193,6 @@ _install_RPi4_image() {
            pv "enosLinuxARM-rpi5-latest.tar.zst" | zstd -T0 -cd -  | bsdtar -xf -  -C $WORKDIR/MP2
            ;;
     esac
-
     # bsdtar --use-compress-program=unzstd -xpf enosLinuxARM-rpi-aarch64-latest.tar.zst -C $WORKDIR/MP2
     printf "\n\n${CYAN}syncing files...can take up to 5 minutes.${NC}\n"
     sync
@@ -204,7 +203,8 @@ _install_RPi4_image() {
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     old=$(awk '{print $1}' $WORKDIR/MP1/cmdline.txt)
     case $FILESYSTEMTYPE in
-        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
+        btrfs) sed -i "s/fsck.repair=yes/fsck.repair=no/" $WORKDIR/MP1/cmdline.txt
+               new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs"
                boot_options=" usbhid.mousepoll=8" ;;
          ext4) new="root=$uuidno"
                boot_options=" usbhid.mousepoll=8" ;;
