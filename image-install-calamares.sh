@@ -102,6 +102,7 @@ _install_Radxa5b_image() {
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $2}')
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        sed -i 's/rootfstype=ext4//g' $WORKDIR/MP1/extlinux/extlinux.conf
         uuidno="$uuidno rootfstype=btrfs rootflags=subvol=@ fsck.repair=no"
     fi
     sed -i "s#$old#$uuidno#" $WORKDIR/MP1/extlinux/extlinux.conf
