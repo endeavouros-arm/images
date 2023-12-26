@@ -81,7 +81,6 @@ _install_Radxa5b_image() {
 
     local uuidno
     local old
-    local new
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-radxa-5b |  sed s'#^.*rootfs-radxa-5b#rootfs-radxa-5b#'g | cut -c 1-24 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-radxa-5b-latest.tar.zst tag = $tag${NC}\n\n"
@@ -99,18 +98,18 @@ _install_Radxa5b_image() {
     # change extlinux.conf to UUID instead of partition label.
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
+    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $2}')
-    new="root=$uuidno"
-    sed -i "s#$old#$new#" $WORKDIR/MP1/extlinux/extlinux.conf
+
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        sed -i 's/rootfstype=ext4/rootfstype=btrfs rootflags=subvol=@ fsck.repair=no/' $WORKDIR/MP1/extlinux/extlinux.conf
+        uuidno="$uuidno rootfstype=btrfs rootflags=subvol=@ fsck.repair=no/"
     fi
+    sed -i "s#$old#$uuidno#" $WORKDIR/MP1/extlinux/extlinux.conf
 }   # End of function _install_Radxa5b_image
 
 _install_Pinebook_image() {
     local uuidno
     local old
-    local new
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-pbp |  sed s'#^.*rootfs-pbp#rootfs-pbp#'g | cut -c 1-19 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-pbp-latest.tar.zst tag = $tag${NC}\n\n"
@@ -128,18 +127,17 @@ _install_Pinebook_image() {
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
+    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $5}')
-    case $FILESYSTEMTYPE in
-        btrfs) new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no" ;;
-        ext4) new="root=$uuidno" ;;
-    esac
-    sed -i "s#$old#$new#" $WORKDIR/MP1/extlinux/extlinux.conf
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+        uuidno="$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
+    fi
+    sed -i "s#$old#$uuidno#" $WORKDIR/MP1/extlinux/extlinux.conf
 }   # End of function _install_Pinebook_image
 
 _install_OdroidN2_image() {
     local uuidno
     local old
-    local new
 
     tag=$(curl https://github.com/endeavouros-arm/images/releases | grep rootfs-odroid-n2 |  sed s'#^.*rootfs-odroid-n2#rootfs-odroid-n2#'g | cut -c 1-25 | head -n 1)
     printf "\n${CYAN}Downloading image enosLinuxARM-odroid-n2-latest.tar.zst tag = $tag${NC}\n\n"
@@ -158,20 +156,18 @@ _install_OdroidN2_image() {
     # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    old=$(grep root= $WORKDIR/MP1/boot.ini | awk '{print $3}')
+    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    old=$(grep "root=" $WORKDIR/MP1/boot.ini | awk '{print $3}')
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        new="\"root=$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
-    else
-        new="\"root=$uuidno"
+        uuidno="\"$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
     fi
-    sed -i "s#$old#$new#" $WORKDIR/MP1/boot.ini
+    sed -i "s#$old#$uuidno#" $WORKDIR/MP1/boot.ini
 }   # End of function _install_OdroidN2_image
 
 _install_RPi4_image() {
     local uuidno
     local old
-    local new
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         _create_btrfs_subvolumes
@@ -201,15 +197,18 @@ _install_RPi4_image() {
     # configure cmdline.txt to use UUIDs instead of partition lables
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
-    old=$(awk '{print $1}' $WORKDIR/MP1/cmdline.txt)
+    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    printf "\nBreakPoint uuidno = $uuidno\n\n"
+    read z
+    old=$(cat $WORKDIR/MP1/cmdline.txt | grep root= | awk '{print $1}')
+#    old=$(awk '{print $1}' $WORKDIR/MP1/cmdline.txt)
     case $FILESYSTEMTYPE in
         btrfs) sed -i "s/fsck.repair=yes/fsck.repair=no/" $WORKDIR/MP1/cmdline.txt
-               new="root=$uuidno rootflags=subvol=@ rootfstype=btrfs"
+               uuidno="$uuidno rootfstype=btrfs rootflags=subvol=@"
                boot_options=" usbhid.mousepoll=8" ;;
-         ext4) new="root=$uuidno"
-               boot_options=" usbhid.mousepoll=8" ;;
+         ext4) boot_options=" usbhid.mousepoll=8" ;;
     esac
-    sed -i "s#$old#$new#" $WORKDIR/MP1/cmdline.txt
+    sed -i "s#$old#$uuidno#" $WORKDIR/MP1/cmdline.txt
     sed -i "s/$/$boot_options/" $WORKDIR/MP1/cmdline.txt
 }  # End of function _install_RPi4_image
 
