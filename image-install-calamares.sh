@@ -198,16 +198,12 @@ _install_RPi4_image() {
     uuidno=$(lsblk -o UUID $PARTNAME2)
     uuidno=$(echo $uuidno | sed 's/ /=/g')
     uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
-    printf "\nBreakPoint uuidno = $uuidno\n\n"
-    read z
     old=$(cat $WORKDIR/MP1/cmdline.txt | grep root= | awk '{print $1}')
-#    old=$(awk '{print $1}' $WORKDIR/MP1/cmdline.txt)
-    case $FILESYSTEMTYPE in
-        btrfs) sed -i "s/fsck.repair=yes/fsck.repair=no/" $WORKDIR/MP1/cmdline.txt
-               uuidno="$uuidno rootfstype=btrfs rootflags=subvol=@"
-               boot_options=" usbhid.mousepoll=8" ;;
-         ext4) boot_options=" usbhid.mousepoll=8" ;;
-    esac
+    boot_options=" usbhid.mousepoll=8"
+    if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
+       sed -i "s/fsck.repair=yes/fsck.repair=no/" $WORKDIR/MP1/cmdline.txt
+       uuidno="$uuidno rootfstype=btrfs rootflags=subvol=@"
+    fi
     sed -i "s#$old#$uuidno#" $WORKDIR/MP1/cmdline.txt
     sed -i "s/$/$boot_options/" $WORKDIR/MP1/cmdline.txt
 }  # End of function _install_RPi4_image
