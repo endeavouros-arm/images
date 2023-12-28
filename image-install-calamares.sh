@@ -59,11 +59,13 @@ _create_btrfs_subvolumes() {
 _fstab_uuid() {
 
     local fstabuuid
+    local partition
 
     printf "\n${CYAN}Changing /etc/fstab to UUID numbers instead of a lable such as /dev/sda.${NC}\n"
     mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
-    fstabuuid=$(lsblk -o UUID $PARTNAME1)
-    fstabuuid=$(echo $fstabuuid | sed 's/ /=/g')
+    partition=$(sed 's#\/dev\/##g' <<< $PARTNAME1)
+    fstabuuid="UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    # fstabuuid should be UUID=XXXX-XXXX
     printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
     printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
     printf "#\n# <file system>             <mount point>  <type>  <options>  <dump>  <pass>\n\n"  >> $WORKDIR/MP2/etc/fstab
@@ -79,6 +81,7 @@ _fstab_uuid() {
 
 _install_Radxa5b_image() {
 
+    local partition
     local uuidno
     local old
 
@@ -96,9 +99,9 @@ _install_Radxa5b_image() {
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
     _fstab_uuid
     # change extlinux.conf to UUID instead of partition label.
-    uuidno=$(lsblk -o UUID $PARTNAME2)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
+    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $2}')
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
@@ -109,6 +112,8 @@ _install_Radxa5b_image() {
 }   # End of function _install_Radxa5b_image
 
 _install_Pinebook_image() {
+
+    local partition
     local uuidno
     local old
 
@@ -126,9 +131,9 @@ _install_Pinebook_image() {
     dd if=$WORKDIR/MP1/Tow-Boot.noenv.bin of=$DEVICENAME seek=64 conv=notrunc,fsync
     _fstab_uuid
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
-    uuidno=$(lsblk -o UUID $PARTNAME2)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
+    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $5}')
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
         uuidno="$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
@@ -155,13 +160,13 @@ _install_OdroidN2_image() {
     dd if=$WORKDIR/MP1/u-boot.bin of=$DEVICENAME conv=fsync,notrunc bs=512 seek=1
     _fstab_uuid
     # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
-    uuidno=$(lsblk -o UUID $PARTNAME2)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
+    uuidno="\"root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    # uuidno should now be "root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep "root=" $WORKDIR/MP1/boot.ini | awk '{print $3}')
 
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
-        uuidno="\"$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
+        uuidno="$uuidno rootflags=subvol=@ rootfstype=btrfs fsck.repair=no"
     fi
     sed -i "s#$old#$uuidno#" $WORKDIR/MP1/boot.ini
 }   # End of function _install_OdroidN2_image
@@ -196,9 +201,9 @@ _install_RPi4_image() {
     mv $WORKDIR/MP2/boot/* $WORKDIR/MP1
     _fstab_uuid
     # configure cmdline.txt to use UUIDs instead of partition lables
-    uuidno=$(lsblk -o UUID $PARTNAME2)
-    uuidno=$(echo $uuidno | sed 's/ /=/g')
-    uuidno="root=$uuidno"   # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+    partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
+    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(cat $WORKDIR/MP1/cmdline.txt | grep root= | awk '{print $1}')
     boot_options=" usbhid.mousepoll=8"
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
