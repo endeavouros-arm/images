@@ -64,7 +64,7 @@ _fstab_uuid() {
     printf "\n${CYAN}Changing /etc/fstab to UUID numbers instead of a lable such as /dev/sda.${NC}\n"
     mv $WORKDIR/MP2/etc/fstab $WORKDIR/MP2/etc/fstab-bkup
     partition=$(sed 's#\/dev\/##g' <<< $PARTNAME1)
-    fstabuuid="UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    fstabuuid="UUID="$(lsblk -o NAME,UUID | grep $partition | awk '{print $2}')
     # fstabuuid should be UUID=XXXX-XXXX
     printf "# /etc/fstab: static file system information.\n#\n# Use 'blkid' to print the universally unique identifier for a device; this may\n" > $WORKDIR/MP2/etc/fstab
     printf "# be used with UUID= as a more robust way to name devices that works even if\n# disks are added and removed. See fstab(5).\n" >> $WORKDIR/MP2/etc/fstab
@@ -100,7 +100,7 @@ _install_Radxa5b_image() {
     _fstab_uuid
     # change extlinux.conf to UUID instead of partition label.
     partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
-    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    uuidno="root=UUID="$(lsblk -o NAME,UUID | grep $partition | awk '{print $2}')
     # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $2}')
 
@@ -132,7 +132,7 @@ _install_Pinebook_image() {
     _fstab_uuid
     # make /boot/extlinux/extlinux.conf work with a UUID instead of a lable such as /dev/sda
     partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
-    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    uuidno="root=UUID="$(lsblk -o NAME,UUID | grep $partition | awk '{print $2}')
     # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep 'root=' $WORKDIR/MP1/extlinux/extlinux.conf | awk '{print $5}')
     if [[ "$FILESYSTEMTYPE" == "btrfs" ]]; then
@@ -161,7 +161,7 @@ _install_OdroidN2_image() {
     _fstab_uuid
     # make /boot/boot.ini work with a UUID instead of a label such as /dev/sda
     partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
-    uuidno="\"root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    uuidno="\"root=UUID="$(lsblk -o NAME,UUID | grep $partition | awk '{print $2}')
     # uuidno should now be "root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(grep "root=" $WORKDIR/MP1/boot.ini | awk '{print $3}')
 
@@ -202,7 +202,7 @@ _install_RPi4_image() {
     _fstab_uuid
     # configure cmdline.txt to use UUIDs instead of partition lables
     partition=$(sed 's#\/dev\/##g' <<< $PARTNAME2)
-    uuidno="root=UUID="$(ls -l  /dev/disk/by-uuid | grep $partition | awk '{print $9}')
+    uuidno="root=UUID="$(lsblk -o NAME,UUID | grep $partition | awk '{print $2}')
     # uuidno should now be root=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXX
     old=$(cat $WORKDIR/MP1/cmdline.txt | grep root= | awk '{print $1}')
     boot_options=" usbhid.mousepoll=8"
