@@ -7,8 +7,8 @@ _partition_Radxa5b() {
 #    dd if=$WORKDIR/configs/rk3588-uboot.img ibs=1 skip=0 count=15728640 of=$DEVICENAME
     parted --script -a minimal $DEVICENAME \
     mklabel gpt \
-    mkpart primary 17MB 266MB \
-    mkpart primary 266MB $DEVICESIZE"MiB" \
+    mkpart primary 17MB 400MB \
+    mkpart primary 400MB $DEVICESIZE"MiB" \
     quit
     rm rk3588-uboot.img
 }
@@ -18,8 +18,8 @@ _partition_Pinebook() {
     parted --script -a minimal $DEVICENAME \
     mklabel gpt \
     unit mib \
-    mkpart primary fat32 16MiB 216MiB \
-    mkpart primary 216MiB $DEVICESIZE"MiB" \
+    mkpart primary fat32 16MiB 400MiB \
+    mkpart primary 400MiB $DEVICESIZE"MiB" \
     quit
 }
 
@@ -27,8 +27,8 @@ _partition_OdroidN2() {
     parted --script -a minimal $DEVICENAME \
     mklabel msdos \
     unit Mib \
-    mkpart primary fat32 2MiB 258MiB \
-    mkpart primary 258MiB $DEVICESIZE"MiB" \
+    mkpart primary fat32 2MiB 300MiB \
+    mkpart primary 300MiB $DEVICESIZE"MiB" \
     quit
 }
 
@@ -36,8 +36,8 @@ _partition_RPi4() {
     parted --script -a minimal $DEVICENAME \
     mklabel gpt \
     unit MiB \
-    mkpart primary fat32 2MiB 202MiB \
-    mkpart primary $FILESYSTEMTYPE 202MiB $DEVICESIZE"MiB" \
+    mkpart primary fat32 2MiB 252MiB \
+    mkpart primary $FILESYSTEMTYPE 252MiB $DEVICESIZE"MiB" \
     quit
 }
 
