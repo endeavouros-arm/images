@@ -16,10 +16,10 @@ Review the Release images by clicking on the "Releases" button on the right side
 Select the appropriate Tag for your ARM device. <br />
 When you find the desired image Tag, click on it. <br />
 Using Raspberry Pi 5 as an example, there should be two files listed.  <br />
-
+...
 enosLinuxARM-rpi5-latest.img.xz
 enosLinuxARM-rpi5-latest.img.xz.sha512sum
-
+...
 Click on each file to download the twp files. <br />
 In a terminal window, go to the directory where the files were downloaded. <br />
 Verify the integrity of the downloaded files. <br />
