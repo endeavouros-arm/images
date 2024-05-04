@@ -2,39 +2,44 @@
  
  [![Maintenance](https://img.shields.io/maintenance/yes/2023.svg)]() [![Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)]()
  
-Images for the installation of EndeavourOS on ARM devices <br />
+Images for the installation of EndeavourOS on supported ARM devices. <br />
+Supported devices include Raspberry Pi 4b, Raspberry Pi 5b. Odroid N2, and Pinebook Pro. <br />
+There is also an image for a bare bones headless server for the RPi 4b / 5b. <br />
 These images contain an EndeavourOS image complete up to including the "Desktop-Base + Common packages". <br />
 The only things missing is some personalization and configuration plus a Desktop Environment or Window Manager. <br />
-These are provided by a Calamares installer. <br /> <br />
-There is also a bare bones headless server image for the RPi 4b.
+These are provided by a script which launches automatically upon first bootup. <br /> <br />
+
 
 # Installation Instructions
 
-There are three methods for installing EndeavourOS on a RPi 4, Odroid N2, or PineBook pro ARM SOC. <br />
-There is one method for installing a headless LAN server on a RPi 4b. Scroll to the bottom <br />
+Review the Release images by clicking on the "Releases" button on the right side if this page. <br /> 
+Select the appropriate Tag for your ARM device. <br />
+When you find the desired image Tag, click on it. <br />
+Using Raspberry Pi 5 as an example, there should be two files listed.  <br />
+
+enosLinuxARM-rpi5-latest.img.xz
+enosLinuxARM-rpi5-latest.img.xz.sha512sum
+
+Click on each file to download the twp files. <br />
+In a terminal window, go to the directory where the files were downloaded. <br />
+Verify the integrity of the downloaded files. <br />
+sha512sum -c enosLinuxARM-rpi5-latest.img.xz.sha512sum
+This should come back with OK.
+
+Use your favorite flash burner app to install <br /> 
+enosLinuxARM-rpi5-latest.img.xz file <br />
+to a storage device such as a micro SD, eMMC, or USB SSD device. <br />
+
+Connect the storage device to your ARM device and bootup. <br />
+The device will automatically log in and run a script that allows <br />
+the entry of your personal details.  Simply answer the questions. <br />
+
+There is also a method for installing a headless LAN server on a RPi 4b. Scroll to the bottom <br />
 for the headless server install.
 
-# Method one
 
-The first method is to boot from the EndeavourOS x86_64 Live ISO available here:
 
-https://endeavouros.com/latest-release/
 
-Connect a target storage device to the computer, either micro SD or USB SSD. <br />
-
-Boot into the EndeavourOS live ISO. <br />
-Then click the welcome button labeled "EndeavourOS ARM Image Installer". <br />
-Answering a few questions, will start a script that installs the image for you. <br />
-Remove the uSD card or USB SSD and connect it to your RPi 4 or Odroid N2.
-
-# Method two
-
-In your favorite browser, go to https://github.com/endeavouros-arm/images/releases <br />
-look for the latest image <br />
-ddimg-rpi-20230115 or ddimg-odroid-n2-20230115 image <br />
-where 2023 is the year, 01 is the month, 15 is the day.
-
-When you find the desired image, click on it.
 Under Assets, for example rpi, click on <br /> 
 ```
 enosLinuxARM-rpi-latest.img.xz 
@@ -55,36 +60,6 @@ When finished transferring the image, ROOT_EOS Partition 2 will show about <br /
 6.2 GB followed by a large amount of Free Space. <br />
 On first boot, Calamares will run and resize Partition 2 to include the Free Space.
 
-# Method 3
-
-The live ISO is not necessary in this procedure. <br />
-On an operational Arch Linux (or derivative) computer: <br />
-Connect a micro SD card or USB SSD enclosure to the computer's USB port or SD slot. <br />
-Launch your favorite Terminal and maximize the window or make it at least 130 x 30
-``` 
-# (switch to root - enter root's password)
-su      
-cd /tmp
-```
-In your tmp directory, make sure a folder named images does not exist
-```
-git clone https://github.com/endeavouros-arm/images.git
-cd images
-```
-check permissions, should show image-install-calamares.sh as executable.
-```
-./image-install-calamares.sh
-```
-Follow the instructions.
-
-Post-Install Method 2
-After installation,
-```
-cd ..
-# (remove the images directory)
-rm -rf images  
-# (exit root)
-exit           
 ```
 # Install headless server image on a RPi 4b.
 
@@ -122,7 +97,7 @@ There are additional HowTo's for SAMBA and miniDLNA.
 
 # Post Image Install
 
-Connect the uSD or USB SSD enclosure to a Raspberry Pi 4b/400 device or Odroid N2/N2+ device.
+Connect the uSD or USB SSD enclosure to your supported ARM device.
 Then boot up the device.
-Openbox should automatically start up and present the Calamares installer.
+A script should automatically start up and ask for information on your install.
 Follow the instructions to complete the EndeavourOS install.
