@@ -30,7 +30,7 @@ This should come back with OK.
 
 Use dd or your favorite flash burner app to install <br /> 
 ```
-enosLinuxARM-rpi5-latest.img.xz file
+enosLinuxARM-rpi5-latest.img.xz
 ```
 to a storage device such as a micro SD, eMMC, or USB SSD device. <br />
 
