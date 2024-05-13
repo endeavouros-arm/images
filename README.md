@@ -5,6 +5,7 @@
 Images for the installation of EndeavourOS on supported ARM devices. <br />
 Devices include Raspberry Pi 4b, Raspberry Pi 5b. Odroid N2, and Pinebook Pro. <br />
 There is also an image for a bare bones headless server for the RPi 4b / 5b. <br />
+
 These images contain a base install of EndeavourOS including some Common packages. <br />
 Ready for some personalization and configuration plus a Desktop Environment or Window Manager. <br />
 These are provided by a script which launches automatically upon first bootup. <br /> <br />
