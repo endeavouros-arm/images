@@ -1,6 +1,6 @@
 # ARM Images
  
- [![Maintenance](https://img.shields.io/maintenance/yes/2024.svg)]() [![Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)]()
+ [![Maintenance](https://img.shields.io/maintenance/yes/2025.svg)]() [![Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)]()
  
 Images for the installation of EndeavourOS on supported ARM devices. <br />
 Devices include Raspberry Pi 4b, Raspberry Pi 5b. Odroid N2, and Pinebook Pro. <br />
