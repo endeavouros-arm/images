@@ -10,6 +10,7 @@ These images contain a base install of EndeavourOS including some Common package
 Ready for some personalization and configuration plus a Desktop Environment or Window Manager. <br />
 These are provided by a script which launches automatically upon first bootup. <br /> <br />
 
+If there are any questions, see https:/forum.endeavouros.com or https:/https://discovery.endeavouros.com/
 
 # Installation Instructions
 
