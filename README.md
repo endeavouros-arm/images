@@ -1,7 +1,7 @@
 # ARM Images
  
  ![Maintenance](https://img.shields.io/maintenance/yes/2026.svg)
- ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/endeavouros-arm/images/total)
+ ![Total Downloads](https://img.shields.io/github/downloads/endeavouros-arm/images/total)
 
 
 
